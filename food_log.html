@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KnowMe">
+<title>KnowMe — Food Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f0f0e;--sur:#1a1a18;--sur2:#232320;--bdr:#2e2e2a;--bdr2:#3d3d38;
+  --acc:#c8f064;--acc-d:rgba(200,240,100,.12);
+  --txt:#f0ede4;--txt2:#8a8878;--txt3:#5a5a50;
+  --warn:#f0a050;--warn-d:rgba(240,160,80,.12);
+  --err:#e05050;--err-d:rgba(224,80,80,.1);
+  --ok:#1D9E75;--ok-d:rgba(29,158,117,.12);
+  --r:10px;--rsm:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:calc(env(safe-area-inset-bottom,20px)+32px)}
+
+header{padding:18px 16px 12px;padding-top:calc(env(safe-area-inset-top,0px)+14px);display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--bdr)}
+header h1{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;letter-spacing:-.3px}
+.hdate{font-size:11px;color:var(--txt2);font-family:'DM Mono',monospace;margin-top:2px}
+.hbtn{background:var(--sur2);border:1px solid var(--bdr2);color:var(--txt2);font-size:12px;padding:6px 12px;border-radius:var(--rsm);font-family:'DM Mono',monospace;cursor:pointer}
+
+.targets{margin:10px 16px 6px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.tv{font-size:13px;font-weight:500;font-family:'DM Mono',monospace;color:var(--acc);text-align:center}
+.tl{font-size:10px;color:var(--txt3);text-align:center;margin-top:1px}
+
+.nlink{margin:0 16px 8px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;text-decoration:none}
+.nlink .nl{display:flex;align-items:center;gap:10px}
+.nlink .ni{width:26px;height:26px;background:var(--sur2);border:1px solid var(--bdr2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.nlink .t1{font-size:13px;font-weight:500;color:var(--txt)}
+.nlink .t2{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace}
+.nlink .ar{color:var(--txt3);font-size:13px}
+
+.scroll{padding:8px 16px;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden}
+.ch{padding:11px 14px 7px;display:flex;align-items:center;justify-content:space-between}
+.ct{font-size:13px;font-weight:500}
+.cs{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace}
+
+.togrow{padding:0 14px 11px;display:flex;align-items:center;gap:8px}
+.tog{width:38px;height:21px;border-radius:11px;background:var(--sur2);border:1px solid var(--bdr2);position:relative;cursor:pointer;transition:all .2s;flex-shrink:0}
+.tog.on{background:var(--acc-d);border-color:var(--acc)}
+.tok{width:15px;height:15px;border-radius:50%;background:var(--txt3);position:absolute;top:2px;left:2px;transition:all .2s}
+.tog.on .tok{left:19px;background:var(--acc)}
+.toglab{font-size:13px;color:var(--txt2)}
+.tog.on+.toglab{color:var(--acc)}
+
+.chips{padding:0 14px 11px;display:flex;flex-direction:column;gap:5px}
+.crow{display:flex;flex-wrap:wrap;gap:5px}
+
+.chip{font-size:12px;padding:5px 10px;border-radius:20px;border:1px solid var(--bdr2);background:var(--sur2);color:var(--txt2);cursor:pointer;user-select:none;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.chip.on{background:var(--acc-d);border-color:var(--acc);color:var(--acc)}
+.chip.gluten:not(.on)::after{content:'⚠';font-size:9px;opacity:.5;margin-left:2px}
+.chip.gluten.on{background:var(--warn-d);border-color:var(--warn);color:var(--warn)}
+.qbadge{display:none;background:rgba(200,240,100,.2);color:var(--acc);font-family:'DM Mono',monospace;font-size:10px;font-weight:500;border-radius:10px;padding:1px 5px}
+.chip.on .qbadge{display:inline-block}
+.chip.gluten.on .qbadge{background:rgba(240,160,80,.2);color:var(--warn)}
+
+.xinput{width:100%;background:var(--sur2);border:1px solid var(--bdr);border-radius:var(--rsm);color:var(--txt);font-size:13px;padding:8px 10px;font-family:'DM Sans',sans-serif;resize:none;min-height:38px;line-height:1.5}
+.xinput:focus{outline:none;border-color:var(--bdr2)}
+.xinput::placeholder{color:var(--txt3)}
+
+.counters{padding:0 14px 11px;display:flex;gap:20px;flex-wrap:wrap}
+.cg{display:flex;align-items:center;gap:8px}
+.clabel{font-size:12px;color:var(--txt2);font-family:'DM Mono',monospace}
+.cbtn{width:26px;height:26px;border-radius:50%;background:var(--sur2);border:1px solid var(--bdr2);color:var(--txt2);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1}
+.cval{font-size:15px;font-weight:500;font-family:'DM Mono',monospace;min-width:18px;text-align:center}
+
+/* Qty popup */
+.popup{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:flex-end;justify-content:center}
+.popup.show{display:flex}
+.sheet{background:var(--sur);border:1px solid var(--bdr2);border-radius:18px 18px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,0px)+24px);width:100%;max-width:480px}
+.sheet h3{font-size:15px;font-weight:500;color:var(--txt);margin-bottom:14px}
+.presets{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.pre{flex:1;min-width:52px;padding:10px 6px;border-radius:var(--rsm);border:1px solid var(--bdr2);background:var(--sur2);color:var(--txt2);font-size:14px;font-family:'DM Mono',monospace;text-align:center;cursor:pointer;transition:all .15s}
+.pre.act{background:var(--acc-d);border-color:var(--acc);color:var(--acc)}
+.custom-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.custom-row label{font-size:12px;color:var(--txt3);white-space:nowrap}
+.custom-row input{flex:1;background:var(--sur2);border:1px solid var(--bdr2);border-radius:var(--rsm);color:var(--txt);font-size:15px;font-family:'DM Mono',monospace;padding:8px 10px;text-align:center}
+.custom-row input:focus{outline:none;border-color:var(--acc)}
+.ulab{font-size:12px;color:var(--txt3);font-family:'DM Mono',monospace;min-width:40px}
+.pbtns{display:flex;gap:8px}
+.pbtn-rem{flex:1;padding:12px;border-radius:var(--r);border:1px solid var(--bdr2);background:transparent;color:var(--txt3);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.pbtn-can{flex:1;padding:12px;border-radius:var(--r);border:1px solid var(--bdr2);background:var(--sur2);color:var(--txt2);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.pbtn-ok{flex:2;padding:12px;border-radius:var(--r);border:none;background:var(--acc);color:#0f0f0e;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+/* Action buttons */
+.actions{padding:4px 16px 10px;display:flex;gap:8px}
+.genbtn{flex:1;background:var(--acc);color:#0f0f0e;border:none;border-radius:var(--r);font-size:14px;font-weight:500;padding:14px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.genbtn:disabled{opacity:.5;cursor:not-allowed}
+.rstbtn{background:var(--sur2);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--r);font-size:13px;padding:14px 16px;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+/* Macro results card */
+.results{margin:0 16px 10px;border-radius:var(--r);overflow:hidden;display:none}
+.results.show{display:block}
+.results-inner{background:var(--sur);border:1px solid var(--bdr2);border-radius:var(--r);padding:14px}
+.results-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.ritem{text-align:center}
+.rval{font-size:18px;font-weight:500;font-family:'DM Mono',monospace}
+.rval.hit{color:var(--ok)}
+.rval.miss{color:var(--warn)}
+.rlabel{font-size:10px;color:var(--txt3);margin-top:2px}
+.rtarget{font-size:10px;color:var(--txt3);margin-top:1px;font-family:'DM Mono',monospace}
+
+/* Log to Notion button */
+.logbtn{width:100%;padding:13px;border-radius:var(--r);border:1px solid var(--ok);background:var(--ok-d);color:var(--ok);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:8px}
+.logbtn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Status messages */
+.status{padding:10px 14px;border-radius:var(--rsm);font-size:13px;font-family:'DM Mono',monospace;margin-bottom:8px;display:none}
+.status.show{display:block}
+.status.loading{background:var(--sur2);color:var(--txt2);border:1px solid var(--bdr2)}
+.status.success{background:var(--ok-d);color:var(--ok);border:1px solid var(--ok)}
+.status.error{background:var(--err-d);color:var(--err);border:1px solid var(--err)}
+
+/* Raw log output */
+.outcard{margin:0 16px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);display:none;overflow:hidden}
+.outcard.show{display:block}
+.outhdr{padding:10px 14px 6px;font-size:11px;font-family:'DM Mono',monospace;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:space-between}
+.cpybtn{background:var(--sur2);border:1px solid var(--bdr2);color:var(--txt2);font-size:11px;padding:4px 10px;border-radius:var(--rsm);cursor:pointer;font-family:'DM Mono',monospace}
+.outtxt{padding:0 14px 14px;font-size:12px;font-family:'DM Mono',monospace;color:var(--txt2);line-height:1.8;white-space:pre-wrap;word-break:break-word}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>KnowMe</h1>
+    <div class="hdate" id="datelabel"></div>
+  </div>
+  <button class="hbtn" onclick="clearAll()">Reset</button>
+</header>
+
+<div class="targets">
+  <div><div class="tv">160g</div><div class="tl">protein</div></div>
+  <div><div class="tv">285g</div><div class="tl">carbs</div></div>
+  <div><div class="tv">95g</div><div class="tl">fat</div></div>
+  <div><div class="tv">2950</div><div class="tl">kcal</div></div>
+</div>
+
+<a class="nlink" href="https://www.notion.so/3454351d03ad8166b62bd7dad81bb94a" target="_blank">
+  <div class="nl"><div class="ni">🥩</div><div><div class="t1">Nutrition Tracker</div><div class="t2">Open in Notion</div></div></div>
+  <div class="ar">→</div>
+</a>
+
+<div class="scroll">
+
+  <!-- PRE-ACHILLES -->
+  <div class="card">
+    <div class="ch"><span class="ct">Pre-achilles shake</span><span class="cs">collagen + vit C</span></div>
+    <div class="togrow">
+      <div class="tog" id="t-ach" onclick="tog('ach')"><div class="tok"></div></div>
+      <span class="toglab" id="l-ach">Not done today</span>
+    </div>
+    <div id="d-ach" style="display:none">
+      <div class="chips">
+        <div class="crow">
+          <div class="chip" data-label="WPI + collagen + milk" onclick="ct(this)"><span class="ct-txt">WPI + collagen + milk</span><span class="qbadge">1×</span></div>
+          <div class="chip" data-label="+ Vit C" onclick="ct(this)"><span class="ct-txt">+ Vit C</span><span class="qbadge">1×</span></div>
+          <div class="chip" data-label="water only (no milk)" onclick="ct(this)"><span class="ct-txt">Water only</span><span class="qbadge">1×</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREAKFAST -->
+  <div class="card">
+    <div class="ch"><span class="ct">Breakfast</span></div>
+    <div class="chips">
+      <div class="crow">
+        <div class="chip" data-label="fried egg" data-unit="eggs" data-p="1,2,3" data-def="2" onclick="ct(this)"><span class="ct-txt">Fried eggs</span><span class="qbadge">2</span></div>
+        <div class="chip" data-label="scrambled egg (MCT + turmeric + chilli)" data-unit="eggs" data-p="1,2,3" data-def="2" onclick="ct(this)"><span class="ct-txt">Scrambled eggs</span><span class="qbadge">2</span></div>
+      </div>
+      <div class="crow">
+        <div class="chip gluten" data-label="slice sourdough (olive oil + butter)" data-unit="slices" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Sourdough + oil + butter</span><span class="qbadge">1</span></div>
+        <div class="chip gluten" data-label="slice sourdough + honey" data-unit="slices" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Sourdough + honey</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="slice GF bread" data-unit="slices" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">GF bread</span><span class="qbadge">1</span></div>
+      </div>
+      <div class="crow">
+        <div class="chip" data-label="hash brown" data-unit="hash browns" data-p="1,2,3" data-def="1" onclick="ct(this)"><span class="ct-txt">Hash browns</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="cup baked beans" data-unit="cups" data-p="0.5,1" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Baked beans</span><span class="qbadge">0.5 cup</span></div>
+        <div class="chip" data-label="avocado" data-unit="avocados" data-p="0.5,1" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Avocado</span><span class="qbadge">0.5</span></div>
+        <div class="chip" data-label="banana" data-unit="bananas" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Banana</span><span class="qbadge">1</span></div>
+      </div>
+      <div class="crow">
+        <div class="chip" data-label="cup GF oats + WPI + berries" data-unit="cups" data-p="0.5,1" data-def="1" onclick="ct(this)"><span class="ct-txt">GF oats + WPI + berries</span><span class="qbadge">1 cup</span></div>
+        <div class="chip" data-label="rice cake with PB + honey" data-unit="rice cakes" data-p="2,4,6" data-def="4" onclick="ct(this)"><span class="ct-txt">Rice cakes + PB + honey</span><span class="qbadge">4</span></div>
+        <div class="chip" data-label="tbsp honey drizzle" data-unit="tbsp" data-p="0.5,1" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Honey drizzle</span><span class="qbadge">0.5 tbsp</span></div>
+      </div>
+      <textarea class="xinput" id="ex-bfast" placeholder="Anything else..." rows="1" oninput="as(this)"></textarea>
+    </div>
+  </div>
+
+  <!-- MORNING SNACK -->
+  <div class="card">
+    <div class="ch"><span class="ct">Morning snack</span><span class="cs">pre-workout if lunch session</span></div>
+    <div class="chips">
+      <div class="crow">
+        <div class="chip" data-label="Carmens protein bar" data-unit="bars" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Carmens bar</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="handful mixed roasted nuts" data-unit="handfuls" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Mixed nuts</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="banana" data-unit="bananas" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Banana</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="rice cake with PB + honey" data-unit="rice cakes" data-p="2,4,6" data-def="4" onclick="ct(this)"><span class="ct-txt">Rice cakes + PB + honey</span><span class="qbadge">4</span></div>
+        <div class="chip" data-label="serve Peckish crackers + Bega Tasty cheese" data-unit="serves" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Peckish crackers + cheese</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="scoop WPI shake + milk" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Protein shake (WPI + milk)</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="tbsp Chief collagen shake" data-unit="tbsp" data-p="3,6" data-def="3" onclick="ct(this)"><span class="ct-txt">Collagen shake</span><span class="qbadge">3 tbsp</span></div>
+      </div>
+      <textarea class="xinput" id="ex-morning" placeholder="Quantities or extras..." rows="1" oninput="as(this)"></textarea>
+    </div>
+  </div>
+
+  <!-- LUNCH -->
+  <div class="card">
+    <div class="ch"><span class="ct">Lunch</span></div>
+    <div class="chips">
+      <div class="crow">
+        <div class="chip" data-label="g chicken breast" data-unit="g" data-p="125,150,175,200" data-def="150" onclick="ct(this)"><span class="ct-txt">Chicken breast</span><span class="qbadge">150g</span></div>
+        <div class="chip" data-label="g steak" data-unit="g" data-p="125,150,200,250" data-def="150" onclick="ct(this)"><span class="ct-txt">Steak</span><span class="qbadge">150g</span></div>
+        <div class="chip" data-label="lamb cutlet" data-unit="cutlets" data-p="1,2,3,4" data-def="2" onclick="ct(this)"><span class="ct-txt">Lamb cutlets</span><span class="qbadge">2</span></div>
+        <div class="chip" data-label="can tuna in olive oil" data-unit="cans" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Tuna (canned)</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="g salmon" data-unit="g" data-p="100,150,200" data-def="150" onclick="ct(this)"><span class="ct-txt">Salmon</span><span class="qbadge">150g</span></div>
+        <div class="chip" data-label="commercial chicken banh mi" data-unit="rolls" data-p="1" data-def="1" onclick="ct(this)"><span class="ct-txt">Banh mi</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="commercial sushi bento box" data-unit="boxes" data-p="1" data-def="1" onclick="ct(this)"><span class="ct-txt">Sushi bento</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="g bolognese mince" data-unit="g" data-p="100,150,200" data-def="150" onclick="ct(this)"><span class="ct-txt">Bolognese</span><span class="qbadge">150g</span></div>
+      </div>
+      <div class="crow">
+        <div class="chip" data-label="cup white rice" data-unit="cups" data-p="0.5,1,1.5,2" data-def="1" onclick="ct(this)"><span class="ct-txt">White rice</span><span class="qbadge">1 cup</span></div>
+        <div class="chip" data-label="cup sweet potato mash" data-unit="cups" data-p="0.5,1,1.5" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Sweet potato mash</span><span class="qbadge">0.5 cup</span></div>
+        <div class="chip" data-label="cup white potato mash" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">White potato mash</span><span class="qbadge">1 cup</span></div>
+        <div class="chip" data-label="cup GF pasta (cooked)" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">GF pasta</span><span class="qbadge">1 cup</span></div>
+        <div class="chip gluten" data-label="cup couscous (cooked)" data-unit="cups" data-p="0.5,1" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Couscous</span><span class="qbadge">0.5 cup</span></div>
+      </div>
+      <div class="crow">
+        <div class="chip" data-label="stalk broccolini" data-unit="stalks" data-p="1,2,3,4" data-def="3" onclick="ct(this)"><span class="ct-txt">Broccolini</span><span class="qbadge">3</span></div>
+        <div class="chip" data-label="cup steamed green beans" data-unit="cups" data-p="0.5,1" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Green beans</span><span class="qbadge">0.5 cup</span></div>
+        <div class="chip" data-label="cup mixed veg" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">Mixed veg</span><span class="qbadge">1 cup</span></div>
+        <div class="chip" data-label="cup salad" data-unit="cups" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Salad</span><span class="qbadge">1 cup</span></div>
+        <div class="chip" data-label="tbsp olive oil (cooking/drizzle)" data-unit="tbsp" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Olive oil</span><span class="qbadge">1 tbsp</span></div>
+      </div>
+      <textarea class="xinput" id="ex-lunch" placeholder="Extras, sauces, notes..." rows="1" oninput="as(this)"></textarea>
+    </div>
+  </div>
+
+  <!-- AFTERNOON SNACK -->
+  <div class="card">
+    <div class="ch"><span class="ct">Afternoon snack</span><span class="cs">pre-workout if arvo session</span></div>
+    <div class="chips">
+      <div class="crow">
+        <div class="chip" data-label="Carmens protein bar" data-unit="bars" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Carmens bar</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="handful mixed roasted nuts" data-unit="handfuls" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Mixed nuts</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="banana" data-unit="bananas" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Banana</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="rice cake with PB + honey" data-unit="rice cakes" data-p="2,4,6" data-def="4" onclick="ct(this)"><span class="ct-txt">Rice cakes + PB + honey</span><span class="qbadge">4</span></div>
+        <div class="chip" data-label="serve Peckish crackers + Bega Tasty cheese" data-unit="serves" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Peckish crackers + cheese</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="YoPro Perform yoghurt" data-unit="serves" data-p="1" data-def="1" onclick="ct(this)"><span class="ct-txt">YoPro yoghurt</span><span class="qbadge">1</span></div>
+        <div class="chip" data-label="square Lindt 85% dark chocolate" data-unit="squares" data-p="2,4" data-def="2" onclick="ct(this)"><span class="ct-txt">Dark chocolate</span><span class="qbadge">2</span></div>
+        <div class="chip" data-label="scoop WPI shake + milk" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Protein shake (WPI)</span><span class="qbadge">1</span></div>
+      </div>
+      <textarea class="xinput" id="ex-arvo" placeholder="Quantities or extras..." rows="1" oninput="as(this)"></textarea>
+    </div>
+  </div>
+
+  <!-- POST WORKOUT -->
+  <div class="card">
+    <div class="ch"><span class="ct">Post-workout shake</span><span class="cs">if applicable</span></div>
+    <div class="togrow">
+      <div class="tog" id="t-post" onclick="tog('post')"><div class="tok"></div></div>
+      <span class="toglab" id="l-post">No post-workout shake</span>
+    </div>
+    <div id="d-post" style="display:none">
+      <div class="chips">
+        <div class="crow">
+          <div class="chip" data-label="scoop WPI + 150ml full cream milk" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">WPI + full cream milk</span><span class="qbadge">1</span></div>
+          <div class="chip" data-label="scoop WPI + 150ml light milk" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">WPI + light milk</span><span class="qbadge">1</span></div>
+          <div class="chip" data-label="scoop WPI + water" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">WPI + water</span><span class="qbadge">1</span></div>
+          <div class="chip" data-label="banana" data-unit="bananas" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">+ banana</span><span class="qbadge">1</span></div>
+          <div class="chip" data-label="tbsp Chief collagen powder" data-unit="tbsp" data-p="3,6" data-def="3" onclick="ct(this)"><span class="ct-txt">+ collagen</span><span class="qbadge">3 tbsp</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DINNER -->
+  <div class="card">
+    <div class="ch"><span class="ct">Dinner</span></div>
+    <div class="chips">
+      <div class="crow">
+        <div class="chip" data-label="g chicken breast" data-unit="g" data-p="150,175,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Chicken breast</span><span class="qbadge">200g</span></div>
+        <div class="chip" data-label="g scotch fillet" data-unit="g" data-p="150,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Scotch fillet</span><span class="qbadge">200g</span></div>
+        <div class="chip" data-label="g rump steak" data-unit="g" data-p="150,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Rump steak</span><span class="qbadge">200g</span></div>
+        <div class="chip" data-label="lamb cutlet" data-unit="cutlets" data-p="2,3,4" data-def="3" onclick="ct(this)"><span class="ct-txt">Lamb cutlets</span><span class="qbadge">3</span></div>
+        <div class="chip" data-label="g salmon" data-unit="g" data-p="150,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Salmon</span><span class="qbadge">200g</span></div>
+        <div class="chip" data-label="g teriyaki chicken (with veg)" data-unit="g" data-p="150,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Teriyaki chicken</span><span class="qbadge">200g</span></div>
+        <div class="chip" data-label="g stir fry beef + mixed veg" data-unit="g" data-p="150,200,250" data-def="150" onclick="ct(this)"><span class="ct-txt">Stir fry beef</span><span class="qbadge">150g</span></div>
+        <div class="chip" data-label="g bolognese mince" data-unit="g" data-p="150,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Bolognese</span><span class="qbadge">200g</span></div>
+        <div class="chip gluten" data-label="slice homemade pizza (sourdough base)" data-unit="slices" data-p="2,3,4" data-def="3" onclick="ct(this)"><span class="ct-txt">Pizza (sourdough)</span><span class="qbadge">3</span></div>
+        <div class="chip" data-label="corn taco (mince + cheese + salad)" data-unit="tacos" data-p="2,3,4" data-def="3" onclick="ct(this)"><span class="ct-txt">Corn tacos</span><span class="qbadge">3</span></div>
+      </div>
+      <div class="crow">
+        <div class="chip" data-label="cup white rice" data-unit="cups" data-p="0.5,1,1.5,2" data-def="1.5" onclick="ct(this)"><span class="ct-txt">White rice</span><span class="qbadge">1.5 cups</span></div>
+        <div class="chip" data-label="cup sweet potato mash" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">Sweet potato mash</span><span class="qbadge">1 cup</span></div>
+        <div class="chip" data-label="cup white potato mash" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">White potato mash</span><span class="qbadge">1 cup</span></div>
+        <div class="chip" data-label="cup GF pasta (cooked)" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">GF pasta</span><span class="qbadge">1 cup</span></div>
+      </div>
+      <div class="crow">
+        <div class="chip" data-label="stalk broccolini" data-unit="stalks" data-p="2,3,4,6" data-def="3" onclick="ct(this)"><span class="ct-txt">Broccolini</span><span class="qbadge">3</span></div>
+        <div class="chip" data-label="cup mixed veg" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">Mixed veg</span><span class="qbadge">1 cup</span></div>
+        <div class="chip" data-label="cup roasted veg" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">Roasted veg</span><span class="qbadge">1 cup</span></div>
+        <div class="chip" data-label="cup salad" data-unit="cups" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Salad</span><span class="qbadge">1 cup</span></div>
+        <div class="chip" data-label="tbsp olive oil (cooking/drizzle)" data-unit="tbsp" data-p="1,2,3" data-def="2" onclick="ct(this)"><span class="ct-txt">Olive oil</span><span class="qbadge">2 tbsp</span></div>
+      </div>
+      <textarea class="xinput" id="ex-dinner" placeholder="Weight, cooking method, sauces..." rows="1" oninput="as(this)"></textarea>
+    </div>
+  </div>
+
+  <!-- EVENING SNACK -->
+  <div class="card">
+    <div class="ch"><span class="ct">Evening snack</span><span class="cs">if macros are short</span></div>
+    <div class="togrow">
+      <div class="tog" id="t-eve" onclick="tog('eve')"><div class="tok"></div></div>
+      <span class="toglab" id="l-eve">No evening snack tonight</span>
+    </div>
+    <div id="d-eve" style="display:none">
+      <div class="chips">
+        <div class="crow">
+          <div class="chip" data-label="g Greek yoghurt + berries" data-unit="g" data-p="150,200" data-def="150" onclick="ct(this)"><span class="ct-txt">Greek yoghurt + berries</span><span class="qbadge">150g</span></div>
+          <div class="chip" data-label="g Greek yoghurt + WPI scoop + berries" data-unit="g" data-p="150,200" data-def="150" onclick="ct(this)"><span class="ct-txt">Greek yoghurt + WPI + berries</span><span class="qbadge">150g</span></div>
+          <div class="chip" data-label="g Greek yoghurt + WPI scoop + banana" data-unit="g" data-p="150,200" data-def="200" onclick="ct(this)"><span class="ct-txt">Greek yoghurt + WPI + banana</span><span class="qbadge">200g</span></div>
+          <div class="chip" data-label="rice cake with peanut butter" data-unit="rice cakes" data-p="2,4" data-def="2" onclick="ct(this)"><span class="ct-txt">Rice cakes + PB</span><span class="qbadge">2</span></div>
+          <div class="chip" data-label="scoop WPI protein shake" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Protein shake</span><span class="qbadge">1</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRINKS -->
+  <div class="card">
+    <div class="ch"><span class="ct">Drinks</span></div>
+    <div class="counters">
+      <div class="cg"><span class="clabel">coffees (cream)</span><div class="cbtn" onclick="ac('ccv',-1)">−</div><span class="cval" id="ccv">0</span><div class="cbtn" onclick="ac('ccv',1)">+</div></div>
+      <div class="cg"><span class="clabel">green tea</span><div class="cbtn" onclick="ac('tcv',-1)">−</div><span class="cval" id="tcv">0</span><div class="cbtn" onclick="ac('tcv',1)">+</div></div>
+    </div>
+    <div class="chips" style="padding-top:0">
+      <div class="crow">
+        <div class="chip" data-label="500ml water" onclick="ct(this)"><span class="ct-txt">500ml water</span><span class="qbadge">1×</span></div>
+        <div class="chip" data-label="1L water" onclick="ct(this)"><span class="ct-txt">1L water</span><span class="qbadge">1×</span></div>
+        <div class="chip" data-label="cup Sancha green tea" data-unit="cups" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Sancha green tea</span><span class="qbadge">1</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="card">
+    <div class="ch"><span class="ct">Notes</span><span class="cs">gut · energy · gluten · sleep</span></div>
+    <div class="chips">
+      <textarea class="xinput" id="ex-notes" placeholder="e.g. felt bloated after lunch, good energy, poor sleep, gluten exposure at dinner..." rows="2" oninput="as(this)"></textarea>
+    </div>
+  </div>
+
+</div>
+
+<!-- Estimate button -->
+<div class="actions">
+  <button class="genbtn" id="estimatebtn" onclick="estimateMacros()">Estimate macros + log to Notion ↗</button>
+  <button class="rstbtn" onclick="clearAll()">Reset</button>
+</div>
+
+<!-- Results -->
+<div class="results" id="results">
+  <div class="results-inner">
+    <div class="results-grid" id="results-grid"></div>
+    <div class="status" id="status-msg"></div>
+    <button class="logbtn" id="logbtn" onclick="logToNotion()" style="display:none">Log this day to Notion →</button>
+  </div>
+</div>
+
+<!-- Raw log fallback -->
+<div class="outcard" id="outcard">
+  <div class="outhdr">Raw log — paste into Claude manually <button class="cpybtn" onclick="copyOut()">Copy</button></div>
+  <div class="outtxt" id="outtxt"></div>
+</div>
+
+<!-- Qty popup -->
+<div class="popup" id="popup" onclick="if(event.target===this)closePopup()">
+  <div class="sheet">
+    <h3 id="p-title">Quantity</h3>
+    <div class="presets" id="p-presets"></div>
+    <div class="custom-row">
+      <label>Custom:</label>
+      <input type="number" id="p-custom" min="0" step="0.5" placeholder="—">
+      <span class="ulab" id="p-unit"></span>
+    </div>
+    <div class="pbtns">
+      <button class="pbtn-rem" onclick="removeChip()">Remove</button>
+      <button class="pbtn-can" onclick="closePopup()">Cancel</button>
+      <button class="pbtn-ok" onclick="confirmQty()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORKER = 'https://knowme-proxy.ian-mcarthur.workers.dev';
+const TARGETS = { protein: 160, carbs: 285, fat: 95, kcal: 2950 };
+
+// Date
+const D=new Date();
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const TODAY_ISO = D.getFullYear()+'-'+String(D.getMonth()+1).padStart(2,'0')+'-'+String(D.getDate()).padStart(2,'0');
+document.getElementById('datelabel').textContent=DAYS[D.getDay()]+' '+D.getDate()+' '+MONS[D.getMonth()]+' '+D.getFullYear();
+
+// Toggles
+const togs={ach:false,post:false,eve:false};
+const tLbls={ach:['Not done today','Done today ✓'],post:['No post-workout shake','Post-workout shake ✓'],eve:['No evening snack tonight','Evening snack logged ✓']};
+function tog(id){
+  togs[id]=!togs[id];
+  document.getElementById('t-'+id).className='tog'+(togs[id]?' on':'');
+  document.getElementById('l-'+id).textContent=tLbls[id][togs[id]?1:0];
+  document.getElementById('d-'+id).style.display=togs[id]?'block':'none';
+}
+
+// Counters
+function ac(id,d){const e=document.getElementById(id);e.textContent=Math.max(0,parseInt(e.textContent)+d);}
+
+// Autosize
+function as(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+
+// Chip state
+const chipQty=new Map();
+let activeChip=null;
+
+function fmtQty(q,unit){
+  const n=parseFloat(q);
+  if(unit==='g') return n+'g';
+  if(unit==='cups') return n+' cup'+(n!==1?'s':'');
+  if(unit==='tbsp') return n+' tbsp';
+  return n+'×';
+}
+
+function updateBadge(el){
+  const b=el.querySelector('.qbadge');
+  if(!b) return;
+  const q=chipQty.get(el);
+  if(!q){b.style.display='none';return;}
+  b.textContent=fmtQty(q,el.dataset.unit||'');
+  b.style.display='';
+}
+
+function ct(el){
+  activeChip=el;
+  const isOn=el.classList.contains('on');
+  const presets=(el.dataset.p||'1').split(',').map(x=>x.trim());
+  const unit=el.dataset.unit||'';
+  const def=el.dataset.def||presets[0];
+  if(!isOn){
+    chipQty.set(el,def);
+    el.classList.add('on');
+    updateBadge(el);
+    if(presets.length===1&&!unit) return;
+    showPopup(el,presets,unit,def);
+  } else {
+    showPopup(el,presets,unit,chipQty.get(el)||def);
+  }
+}
+
+function showPopup(el,presets,unit,current){
+  document.getElementById('p-title').textContent=el.querySelector('.ct-txt').textContent.trim();
+  document.getElementById('p-unit').textContent=unit;
+  document.getElementById('p-custom').value='';
+  const container=document.getElementById('p-presets');
+  container.innerHTML='';
+  presets.forEach(p=>{
+    const btn=document.createElement('button');
+    btn.className='pre'+(String(p)===String(current)?' act':'');
+    btn.textContent=fmtQty(p,unit);
+    btn.onclick=()=>{
+      container.querySelectorAll('.pre').forEach(b=>b.classList.remove('act'));
+      btn.classList.add('act');
+      document.getElementById('p-custom').value='';
+    };
+    container.appendChild(btn);
+  });
+  document.getElementById('popup').className='popup show';
+}
+
+function confirmQty(){
+  if(!activeChip){closePopup();return;}
+  const custom=document.getElementById('p-custom').value.trim();
+  const active=document.querySelector('#p-presets .pre.act');
+  const presetVal=active?active.textContent.replace(/[^0-9.]/g,''):null;
+  const qty=custom||presetVal||(activeChip.dataset.def||'1');
+  chipQty.set(activeChip,qty);
+  activeChip.classList.add('on');
+  updateBadge(activeChip);
+  closePopup();
+}
+
+function removeChip(){
+  if(!activeChip){closePopup();return;}
+  activeChip.classList.remove('on');
+  chipQty.delete(activeChip);
+  updateBadge(activeChip);
+  closePopup();
+}
+
+function closePopup(){
+  document.getElementById('popup').className='popup';
+  activeChip=null;
+}
+
+// Build food log text from selections
+function buildLog(){
+  const cards=[...document.querySelectorAll('.scroll .card')];
+  const lines=[];
+
+  function chipsFrom(card){
+    const result=[];
+    card.querySelectorAll('.chip.on').forEach(el=>{
+      const q=chipQty.get(el)||(el.dataset.def||'1');
+      const label=el.dataset.label||el.querySelector('.ct-txt').textContent.trim();
+      result.push(q+' '+label);
+    });
+    return result;
+  }
+
+  if(togs.ach){
+    const items=chipsFrom(cards[0]);
+    lines.push('Pre-achilles shake: '+(items.length?items.join(', '):'WPI + collagen + milk'));
+  }
+
+  const bf=[...chipsFrom(cards[1])];
+  const bfx=document.getElementById('ex-bfast').value.trim();
+  if(bfx) bf.push(bfx);
+  if(bf.length) lines.push('Breakfast: '+bf.join(', '));
+
+  const ms=[...chipsFrom(cards[2])];
+  const msx=document.getElementById('ex-morning').value.trim();
+  if(msx) ms.push(msx);
+  if(ms.length) lines.push('Morning snack: '+ms.join(', '));
+
+  const lu=[...chipsFrom(cards[3])];
+  const lux=document.getElementById('ex-lunch').value.trim();
+  if(lux) lu.push(lux);
+  if(lu.length) lines.push('Lunch: '+lu.join(', '));
+
+  const av=[...chipsFrom(cards[4])];
+  const avx=document.getElementById('ex-arvo').value.trim();
+  if(avx) av.push(avx);
+  if(av.length) lines.push('Afternoon snack: '+av.join(', '));
+
+  if(togs.post){
+    const pw=chipsFrom(cards[5]);
+    lines.push('Post-workout shake: '+(pw.length?pw.join(', '):'1 scoop WPI + milk'));
+  }
+
+  const di=[...chipsFrom(cards[6])];
+  const dix=document.getElementById('ex-dinner').value.trim();
+  if(dix) di.push(dix);
+  if(di.length) lines.push('Dinner: '+di.join(', '));
+
+  if(togs.eve){
+    const ev=chipsFrom(cards[7]);
+    lines.push('Evening snack: '+(ev.length?ev.join(', '):'Greek yoghurt + berries'));
+  }
+
+  const coffees=parseInt(document.getElementById('ccv').textContent);
+  const teas=parseInt(document.getElementById('tcv').textContent);
+  const dk=chipsFrom(cards[8]);
+  const dkall=[];
+  if(coffees>0) dkall.push(coffees+' coffee with cream');
+  if(teas>0) dkall.push(teas+' green tea');
+  dkall.push(...dk);
+  if(dkall.length) lines.push('Drinks: '+dkall.join(', '));
+
+  const notes=document.getElementById('ex-notes').value.trim();
+  if(notes) lines.push('Notes: '+notes);
+
+  return lines.join('\n');
+}
+
+// Detect flags from log text
+function detectFlags(logText){
+  const l=logText.toLowerCase();
+  return {
+    trainingDay: togs.post,
+    preAchilles: togs.ach,
+    postWorkout: togs.post,
+    eveningSnack: togs.eve,
+    glutenExposure: l.includes('sourdough')||l.includes('couscous')||l.includes('pizza')||l.includes('hoisin')
+  };
+}
+
+// Stored macros for logging
+let pendingMacros=null;
+let pendingLog='';
+let pendingFlags={};
+
+async function estimateMacros(){
+  const log=buildLog();
+  if(!log.trim()){alert('Select at least one item first.');return;}
+
+  pendingLog=log;
+  pendingFlags=detectFlags(log);
+
+  // Show raw log as fallback
+  document.getElementById('outtxt').textContent=log;
+  document.getElementById('outcard').className='outcard show';
+
+  // Show loading state
+  const btn=document.getElementById('estimatebtn');
+  btn.disabled=true;
+  btn.textContent='Estimating macros...';
+
+  showStatus('loading','Estimating macros via Claude...');
+  document.getElementById('results').className='results show';
+  document.getElementById('logbtn').style.display='none';
+
+  try {
+    const res=await fetch(WORKER+'/estimate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({foodLog:log})
+    });
+    const macros=await res.json();
+
+    if(macros.error){
+      showStatus('error','Estimation failed: '+macros.error);
+      btn.disabled=false;
+      btn.textContent='Estimate macros + log to Notion ↗';
+      return;
+    }
+
+    pendingMacros=macros;
+    renderMacros(macros);
+    showStatus('','');
+    document.getElementById('status-msg').className='status';
+    document.getElementById('logbtn').style.display='block';
+
+  } catch(e){
+    showStatus('error','Could not reach the server. Check your connection and try again.');
+  }
+
+  btn.disabled=false;
+  btn.textContent='Re-estimate ↺';
+  btn.style.background='var(--sur2)';
+  btn.style.color='var(--txt2)';
+  btn.style.border='1px solid var(--bdr2)';
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderMacros(m){
+  const grid=document.getElementById('results-grid');
+  const items=[
+    {key:'protein',label:'Protein',target:TARGETS.protein,unit:'g'},
+    {key:'carbs',label:'Carbs',target:TARGETS.carbs,unit:'g'},
+    {key:'fat',label:'Fat',target:TARGETS.fat,unit:'g'},
+    {key:'kcal',label:'Calories',target:TARGETS.kcal,unit:'kcal'},
+  ];
+  grid.innerHTML=items.map(i=>{
+    const val=m[i.key]||0;
+    const hit=val>=i.target;
+    return `<div class="ritem">
+      <div class="rval ${hit?'hit':'miss'}">${val}${i.unit==='g'?'g':''}</div>
+      <div class="rlabel">${i.label}</div>
+      <div class="rtarget">target ${i.target}${i.unit==='g'?'g':''}</div>
+    </div>`;
+  }).join('');
+}
+
+async function logToNotion(){
+  if(!pendingMacros){return;}
+  const logbtn=document.getElementById('logbtn');
+  logbtn.disabled=true;
+  logbtn.textContent='Logging to Notion...';
+  showStatus('loading','Writing to Notion...');
+
+  const dayName=DAYS[D.getDay()]+' '+D.getDate()+' '+MONS[D.getMonth()];
+
+  try {
+    const res=await fetch(WORKER+'/log',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        date: TODAY_ISO,
+        name: dayName,
+        macros: pendingMacros,
+        flags: pendingFlags,
+        notes: document.getElementById('ex-notes').value.trim()
+      })
+    });
+    const result=await res.json();
+    if(result.success){
+      showStatus('success','✓ Logged to Notion successfully');
+      logbtn.textContent='Logged ✓';
+      logbtn.style.background='var(--ok-d)';
+      logbtn.style.borderColor='var(--ok)';
+      logbtn.style.color='var(--ok)';
+    } else {
+      showStatus('error','Notion error: '+(result.error||'Unknown error'));
+      logbtn.disabled=false;
+      logbtn.textContent='Retry log to Notion →';
+    }
+  } catch(e){
+    showStatus('error','Could not reach the server. Check your connection.');
+    logbtn.disabled=false;
+    logbtn.textContent='Retry log to Notion →';
+  }
+}
+
+function showStatus(type,msg){
+  const el=document.getElementById('status-msg');
+  if(!type||!msg){el.className='status';return;}
+  el.className='status show '+type;
+  el.textContent=msg;
+}
+
+function copyOut(){
+  const text=document.getElementById('outtxt').textContent;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>{
+      const btn=document.querySelector('.cpybtn');
+      btn.textContent='Copied ✓';
+      setTimeout(()=>btn.textContent='Copy',2500);
+    });
+  }
+}
+
+function clearAll(){
+  document.querySelectorAll('.chip.on').forEach(el=>{
+    el.classList.remove('on');
+    chipQty.delete(el);
+    const b=el.querySelector('.qbadge');
+    if(b) b.style.display='none';
+  });
+  document.querySelectorAll('.xinput').forEach(t=>{t.value='';t.style.height='auto';});
+  document.getElementById('ccv').textContent='0';
+  document.getElementById('tcv').textContent='0';
+  ['ach','post','eve'].forEach(id=>{if(togs[id])tog(id);});
+  document.getElementById('results').className='results';
+  document.getElementById('outcard').className='outcard';
+  const btn=document.getElementById('estimatebtn');
+  btn.textContent='Estimate macros + log to Notion ↗';
+  btn.disabled=false;
+  btn.style.background='';btn.style.color='';btn.style.border='';
+  pendingMacros=null;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
