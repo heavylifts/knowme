@@ -15,44 +15,92 @@
   --acc:#c8f064;--acc-d:rgba(200,240,100,.12);
   --txt:#f0ede4;--txt2:#8a8878;--txt3:#5a5a50;
   --warn:#f0a050;--warn-d:rgba(240,160,80,.12);
-  --err:#e05050;--err-d:rgba(224,80,80,.1);
   --ok:#1D9E75;--ok-d:rgba(29,158,117,.12);
+  --err:#e05050;--err-d:rgba(224,80,80,.1);
   --r:10px;--rsm:6px;
+  --tally-h:72px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:calc(env(safe-area-inset-bottom,20px)+32px)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:calc(var(--tally-h) + env(safe-area-inset-bottom,0px) + 16px)}
 
-header{padding:18px 16px 12px;padding-top:calc(env(safe-area-inset-top,0px)+14px);display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--bdr)}
+/* HEADER */
+header{padding:16px 16px 10px;padding-top:calc(env(safe-area-inset-top,0px)+14px);display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--bdr)}
 header h1{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;letter-spacing:-.3px}
 .hdate{font-size:11px;color:var(--txt2);font-family:'DM Mono',monospace;margin-top:2px}
 .hbtn{background:var(--sur2);border:1px solid var(--bdr2);color:var(--txt2);font-size:12px;padding:6px 12px;border-radius:var(--rsm);font-family:'DM Mono',monospace;cursor:pointer}
 
-.targets{margin:10px 16px 6px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-.tv{font-size:13px;font-weight:500;font-family:'DM Mono',monospace;color:var(--acc);text-align:center}
-.tl{font-size:10px;color:var(--txt3);text-align:center;margin-top:1px}
-
-.nlink{margin:0 16px 8px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;text-decoration:none}
+/* NOTION LINK */
+.nlink{margin:10px 16px 6px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;text-decoration:none}
 .nlink .nl{display:flex;align-items:center;gap:10px}
 .nlink .ni{width:26px;height:26px;background:var(--sur2);border:1px solid var(--bdr2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
 .nlink .t1{font-size:13px;font-weight:500;color:var(--txt)}
 .nlink .t2{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace}
-.nlink .ar{color:var(--txt3);font-size:13px}
 
-.scroll{padding:8px 16px;display:flex;flex-direction:column;gap:10px}
-.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden}
-.ch{padding:11px 14px 7px;display:flex;align-items:center;justify-content:space-between}
-.ct{font-size:13px;font-weight:500}
-.cs{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace}
+/* PINNED TALLY */
+.tally{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--sur);
+  border-top:1px solid var(--bdr2);
+  padding:10px 16px;
+  padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  z-index:100;
+}
+.tally-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tally-item{}
+.tally-label{font-size:9px;font-family:'DM Mono',monospace;color:var(--txt3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;display:flex;justify-content:space-between;align-items:baseline}
+.tally-label span{font-size:10px;font-weight:500;font-family:'DM Mono',monospace}
+.tally-label span.hit{color:var(--ok)}
+.tally-label span.warn{color:var(--warn)}
+.tally-label span.miss{color:var(--txt2)}
+.tbar-bg{height:5px;background:var(--sur2);border-radius:3px;overflow:visible;position:relative}
+.tbar-fill{height:100%;border-radius:3px;transition:width .4s ease;min-width:0}
+.tbar-tick{position:absolute;top:-3px;width:1.5px;height:11px;background:var(--txt3);border-radius:1px;opacity:.4}
+.tally-nums{font-size:10px;font-family:'DM Mono',monospace;color:var(--txt3);margin-top:2px;display:flex;justify-content:space-between}
+.tally-nums .gap{font-weight:500}
+.tally-nums .gap.hit{color:var(--ok)}
+.tally-nums .gap.warn{color:var(--warn)}
+.tally-nums .gap.miss{color:var(--txt2)}
 
-.togrow{padding:0 14px 11px;display:flex;align-items:center;gap:8px}
-.tog{width:38px;height:21px;border-radius:11px;background:var(--sur2);border:1px solid var(--bdr2);position:relative;cursor:pointer;transition:all .2s;flex-shrink:0}
-.tog.on{background:var(--acc-d);border-color:var(--acc)}
-.tok{width:15px;height:15px;border-radius:50%;background:var(--txt3);position:absolute;top:2px;left:2px;transition:all .2s}
-.tog.on .tok{left:19px;background:var(--acc)}
-.toglab{font-size:13px;color:var(--txt2)}
-.tog.on+.toglab{color:var(--acc)}
+/* SCROLL AREA */
+.scroll{padding:6px 16px;display:flex;flex-direction:column;gap:10px}
 
-.chips{padding:0 14px 11px;display:flex;flex-direction:column;gap:5px}
+/* MEAL CARD */
+.meal-card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;transition:border-color .2s,opacity .2s}
+.meal-card.active{border-color:var(--bdr2)}
+.meal-card.logged{border-color:var(--ok);opacity:1}
+.meal-card.skipped{opacity:.45}
+
+/* MEAL HEADER */
+.meal-header{padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.meal-toggle{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--bdr2);background:var(--sur2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.meal-toggle.on{background:var(--acc-d);border-color:var(--acc)}
+.meal-toggle svg{display:none;width:12px;height:12px}
+.meal-toggle.on svg{display:block}
+.meal-toggle.logged-icon{background:var(--ok-d);border-color:var(--ok)}
+.meal-toggle.logged-icon svg{display:block;color:var(--ok)}
+.meal-title{flex:1}
+.meal-title .mt{font-size:13px;font-weight:500;color:var(--txt)}
+.meal-title .ms{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace;margin-top:1px}
+.meal-status-badge{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:10px;flex-shrink:0}
+.badge-off{background:var(--sur2);color:var(--txt3)}
+.badge-ready{background:var(--acc-d);color:var(--acc)}
+.badge-logged{background:var(--ok-d);color:var(--ok)}
+.badge-skipped{background:var(--sur2);color:var(--txt3)}
+
+/* MEAL BODY */
+.meal-body{display:none;border-top:1px solid var(--bdr)}
+.meal-body.open{display:block}
+
+/* MEAL SUMMARY (after logging) */
+.meal-summary{padding:10px 14px;background:var(--ok-d);border-top:1px solid var(--ok);display:none}
+.meal-summary.show{display:block}
+.meal-summary .ms-title{font-size:11px;font-family:'DM Mono',monospace;color:var(--ok);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.meal-summary .ms-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.meal-summary .ms-item{text-align:center}
+.meal-summary .ms-val{font-size:14px;font-weight:500;font-family:'DM Mono',monospace;color:var(--ok)}
+.meal-summary .ms-lbl{font-size:9px;color:rgba(29,158,117,.7);margin-top:1px}
+
+.chips{padding:10px 14px 6px;display:flex;flex-direction:column;gap:5px}
 .crow{display:flex;flex-wrap:wrap;gap:5px}
 
 .chip{font-size:12px;padding:5px 10px;border-radius:20px;border:1px solid var(--bdr2);background:var(--sur2);color:var(--txt2);cursor:pointer;user-select:none;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
@@ -67,13 +115,22 @@ header h1{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;le
 .xinput:focus{outline:none;border-color:var(--bdr2)}
 .xinput::placeholder{color:var(--txt3)}
 
-.counters{padding:0 14px 11px;display:flex;gap:20px;flex-wrap:wrap}
+.counters{padding:10px 14px 6px;display:flex;gap:20px;flex-wrap:wrap}
 .cg{display:flex;align-items:center;gap:8px}
 .clabel{font-size:12px;color:var(--txt2);font-family:'DM Mono',monospace}
 .cbtn{width:26px;height:26px;border-radius:50%;background:var(--sur2);border:1px solid var(--bdr2);color:var(--txt2);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1}
 .cval{font-size:15px;font-weight:500;font-family:'DM Mono',monospace;min-width:18px;text-align:center}
 
-/* Qty popup */
+/* LOG IT BUTTON */
+.log-row{padding:8px 14px 12px;display:flex;gap:8px;align-items:center}
+.logbtn{flex:1;background:var(--acc);color:#0f0f0e;border:none;border-radius:var(--r);font-size:13px;font-weight:500;padding:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.logbtn:disabled{opacity:.5;cursor:not-allowed}
+.logbtn.logging{background:var(--sur2);color:var(--txt2);border:1px solid var(--bdr2)}
+.logbtn.done{background:var(--ok-d);color:var(--ok);border:1px solid var(--ok)}
+.log-status{font-size:11px;font-family:'DM Mono',monospace;color:var(--txt3)}
+.log-status.err{color:var(--err)}
+
+/* QTY POPUP */
 .popup{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);align-items:flex-end;justify-content:center}
 .popup.show{display:flex}
 .sheet{background:var(--sur);border:1px solid var(--bdr2);border-radius:18px 18px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,0px)+24px);width:100%;max-width:480px}
@@ -90,42 +147,6 @@ header h1{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;le
 .pbtn-rem{flex:1;padding:12px;border-radius:var(--r);border:1px solid var(--bdr2);background:transparent;color:var(--txt3);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif}
 .pbtn-can{flex:1;padding:12px;border-radius:var(--r);border:1px solid var(--bdr2);background:var(--sur2);color:var(--txt2);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif}
 .pbtn-ok{flex:2;padding:12px;border-radius:var(--r);border:none;background:var(--acc);color:#0f0f0e;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
-
-/* Action buttons */
-.actions{padding:4px 16px 10px;display:flex;gap:8px}
-.genbtn{flex:1;background:var(--acc);color:#0f0f0e;border:none;border-radius:var(--r);font-size:14px;font-weight:500;padding:14px;cursor:pointer;font-family:'DM Sans',sans-serif}
-.genbtn:disabled{opacity:.5;cursor:not-allowed}
-.rstbtn{background:var(--sur2);border:1px solid var(--bdr2);color:var(--txt2);border-radius:var(--r);font-size:13px;padding:14px 16px;cursor:pointer;font-family:'DM Sans',sans-serif}
-
-/* Macro results card */
-.results{margin:0 16px 10px;border-radius:var(--r);overflow:hidden;display:none}
-.results.show{display:block}
-.results-inner{background:var(--sur);border:1px solid var(--bdr2);border-radius:var(--r);padding:14px}
-.results-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-.ritem{text-align:center}
-.rval{font-size:18px;font-weight:500;font-family:'DM Mono',monospace}
-.rval.hit{color:var(--ok)}
-.rval.miss{color:var(--warn)}
-.rlabel{font-size:10px;color:var(--txt3);margin-top:2px}
-.rtarget{font-size:10px;color:var(--txt3);margin-top:1px;font-family:'DM Mono',monospace}
-
-/* Log to Notion button */
-.logbtn{width:100%;padding:13px;border-radius:var(--r);border:1px solid var(--ok);background:var(--ok-d);color:var(--ok);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:8px}
-.logbtn:disabled{opacity:.5;cursor:not-allowed}
-
-/* Status messages */
-.status{padding:10px 14px;border-radius:var(--rsm);font-size:13px;font-family:'DM Mono',monospace;margin-bottom:8px;display:none}
-.status.show{display:block}
-.status.loading{background:var(--sur2);color:var(--txt2);border:1px solid var(--bdr2)}
-.status.success{background:var(--ok-d);color:var(--ok);border:1px solid var(--ok)}
-.status.error{background:var(--err-d);color:var(--err);border:1px solid var(--err)}
-
-/* Raw log output */
-.outcard{margin:0 16px 16px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);display:none;overflow:hidden}
-.outcard.show{display:block}
-.outhdr{padding:10px 14px 6px;font-size:11px;font-family:'DM Mono',monospace;color:var(--txt2);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:space-between}
-.cpybtn{background:var(--sur2);border:1px solid var(--bdr2);color:var(--txt2);font-size:11px;padding:4px 10px;border-radius:var(--rsm);cursor:pointer;font-family:'DM Mono',monospace}
-.outtxt{padding:0 14px 14px;font-size:12px;font-family:'DM Mono',monospace;color:var(--txt2);line-height:1.8;white-space:pre-wrap;word-break:break-word}
 </style>
 </head>
 <body>
@@ -135,257 +156,26 @@ header h1{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;le
     <h1>KnowMe</h1>
     <div class="hdate" id="datelabel"></div>
   </div>
-  <button class="hbtn" onclick="clearAll()">Reset</button>
+  <button class="hbtn" onclick="resetDay()">Reset day</button>
 </header>
 
-<div class="targets">
-  <div><div class="tv">160g</div><div class="tl">protein</div></div>
-  <div><div class="tv">285g</div><div class="tl">carbs</div></div>
-  <div><div class="tv">95g</div><div class="tl">fat</div></div>
-  <div><div class="tv">2950</div><div class="tl">kcal</div></div>
-</div>
-
 <a class="nlink" href="https://www.notion.so/3454351d03ad8166b62bd7dad81bb94a" target="_blank">
-  <div class="nl"><div class="ni">🥩</div><div><div class="t1">Nutrition Tracker</div><div class="t2">Open in Notion</div></div></div>
-  <div class="ar">→</div>
+  <div class="nl"><div class="ni">🥩</div><div><div class="t1">Nutrition Tracker</div><div class="t2">Open in Notion →</div></div></div>
 </a>
 
-<div class="scroll">
+<div class="scroll" id="meal-list"></div>
 
-  <!-- PRE-ACHILLES -->
-  <div class="card">
-    <div class="ch"><span class="ct">Pre-achilles shake</span><span class="cs">collagen + vit C</span></div>
-    <div class="togrow">
-      <div class="tog" id="t-ach" onclick="tog('ach')"><div class="tok"></div></div>
-      <span class="toglab" id="l-ach">Not done today</span>
-    </div>
-    <div id="d-ach" style="display:none">
-      <div class="chips">
-        <div class="crow">
-          <div class="chip" data-label="WPI + collagen + milk" onclick="ct(this)"><span class="ct-txt">WPI + collagen + milk</span><span class="qbadge">1×</span></div>
-          <div class="chip" data-label="+ Vit C" onclick="ct(this)"><span class="ct-txt">+ Vit C</span><span class="qbadge">1×</span></div>
-          <div class="chip" data-label="water only (no milk)" onclick="ct(this)"><span class="ct-txt">Water only</span><span class="qbadge">1×</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BREAKFAST -->
-  <div class="card">
-    <div class="ch"><span class="ct">Breakfast</span></div>
-    <div class="chips">
-      <div class="crow">
-        <div class="chip" data-label="fried egg" data-unit="eggs" data-p="1,2,3" data-def="2" onclick="ct(this)"><span class="ct-txt">Fried eggs</span><span class="qbadge">2</span></div>
-        <div class="chip" data-label="scrambled egg (MCT + turmeric + chilli)" data-unit="eggs" data-p="1,2,3" data-def="2" onclick="ct(this)"><span class="ct-txt">Scrambled eggs</span><span class="qbadge">2</span></div>
-      </div>
-      <div class="crow">
-        <div class="chip gluten" data-label="slice sourdough (olive oil + butter)" data-unit="slices" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Sourdough + oil + butter</span><span class="qbadge">1</span></div>
-        <div class="chip gluten" data-label="slice sourdough + honey" data-unit="slices" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Sourdough + honey</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="slice GF bread" data-unit="slices" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">GF bread</span><span class="qbadge">1</span></div>
-      </div>
-      <div class="crow">
-        <div class="chip" data-label="hash brown" data-unit="hash browns" data-p="1,2,3" data-def="1" onclick="ct(this)"><span class="ct-txt">Hash browns</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="cup baked beans" data-unit="cups" data-p="0.5,1" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Baked beans</span><span class="qbadge">0.5 cup</span></div>
-        <div class="chip" data-label="avocado" data-unit="avocados" data-p="0.5,1" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Avocado</span><span class="qbadge">0.5</span></div>
-        <div class="chip" data-label="banana" data-unit="bananas" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Banana</span><span class="qbadge">1</span></div>
-      </div>
-      <div class="crow">
-        <div class="chip" data-label="cup GF oats + WPI + berries" data-unit="cups" data-p="0.5,1" data-def="1" onclick="ct(this)"><span class="ct-txt">GF oats + WPI + berries</span><span class="qbadge">1 cup</span></div>
-        <div class="chip" data-label="rice cake with PB + honey" data-unit="rice cakes" data-p="2,4,6" data-def="4" onclick="ct(this)"><span class="ct-txt">Rice cakes + PB + honey</span><span class="qbadge">4</span></div>
-        <div class="chip" data-label="tbsp honey drizzle" data-unit="tbsp" data-p="0.5,1" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Honey drizzle</span><span class="qbadge">0.5 tbsp</span></div>
-      </div>
-      <textarea class="xinput" id="ex-bfast" placeholder="Anything else..." rows="1" oninput="as(this)"></textarea>
-    </div>
-  </div>
-
-  <!-- MORNING SNACK -->
-  <div class="card">
-    <div class="ch"><span class="ct">Morning snack</span><span class="cs">pre-workout if lunch session</span></div>
-    <div class="chips">
-      <div class="crow">
-        <div class="chip" data-label="Carmens protein bar" data-unit="bars" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Carmens bar</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="handful mixed roasted nuts" data-unit="handfuls" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Mixed nuts</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="banana" data-unit="bananas" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Banana</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="rice cake with PB + honey" data-unit="rice cakes" data-p="2,4,6" data-def="4" onclick="ct(this)"><span class="ct-txt">Rice cakes + PB + honey</span><span class="qbadge">4</span></div>
-        <div class="chip" data-label="serve Peckish crackers + Bega Tasty cheese" data-unit="serves" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Peckish crackers + cheese</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="scoop WPI shake + milk" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Protein shake (WPI + milk)</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="tbsp Chief collagen shake" data-unit="tbsp" data-p="3,6" data-def="3" onclick="ct(this)"><span class="ct-txt">Collagen shake</span><span class="qbadge">3 tbsp</span></div>
-      </div>
-      <textarea class="xinput" id="ex-morning" placeholder="Quantities or extras..." rows="1" oninput="as(this)"></textarea>
-    </div>
-  </div>
-
-  <!-- LUNCH -->
-  <div class="card">
-    <div class="ch"><span class="ct">Lunch</span></div>
-    <div class="chips">
-      <div class="crow">
-        <div class="chip" data-label="g chicken breast" data-unit="g" data-p="125,150,175,200" data-def="150" onclick="ct(this)"><span class="ct-txt">Chicken breast</span><span class="qbadge">150g</span></div>
-        <div class="chip" data-label="g steak" data-unit="g" data-p="125,150,200,250" data-def="150" onclick="ct(this)"><span class="ct-txt">Steak</span><span class="qbadge">150g</span></div>
-        <div class="chip" data-label="lamb cutlet" data-unit="cutlets" data-p="1,2,3,4" data-def="2" onclick="ct(this)"><span class="ct-txt">Lamb cutlets</span><span class="qbadge">2</span></div>
-        <div class="chip" data-label="can tuna in olive oil" data-unit="cans" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Tuna (canned)</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="g salmon" data-unit="g" data-p="100,150,200" data-def="150" onclick="ct(this)"><span class="ct-txt">Salmon</span><span class="qbadge">150g</span></div>
-        <div class="chip" data-label="commercial chicken banh mi" data-unit="rolls" data-p="1" data-def="1" onclick="ct(this)"><span class="ct-txt">Banh mi</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="commercial sushi bento box" data-unit="boxes" data-p="1" data-def="1" onclick="ct(this)"><span class="ct-txt">Sushi bento</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="g bolognese mince" data-unit="g" data-p="100,150,200" data-def="150" onclick="ct(this)"><span class="ct-txt">Bolognese</span><span class="qbadge">150g</span></div>
-      </div>
-      <div class="crow">
-        <div class="chip" data-label="cup white rice" data-unit="cups" data-p="0.5,1,1.5,2" data-def="1" onclick="ct(this)"><span class="ct-txt">White rice</span><span class="qbadge">1 cup</span></div>
-        <div class="chip" data-label="cup sweet potato mash" data-unit="cups" data-p="0.5,1,1.5" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Sweet potato mash</span><span class="qbadge">0.5 cup</span></div>
-        <div class="chip" data-label="cup white potato mash" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">White potato mash</span><span class="qbadge">1 cup</span></div>
-        <div class="chip" data-label="cup GF pasta (cooked)" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">GF pasta</span><span class="qbadge">1 cup</span></div>
-        <div class="chip gluten" data-label="cup couscous (cooked)" data-unit="cups" data-p="0.5,1" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Couscous</span><span class="qbadge">0.5 cup</span></div>
-      </div>
-      <div class="crow">
-        <div class="chip" data-label="stalk broccolini" data-unit="stalks" data-p="1,2,3,4" data-def="3" onclick="ct(this)"><span class="ct-txt">Broccolini</span><span class="qbadge">3</span></div>
-        <div class="chip" data-label="cup steamed green beans" data-unit="cups" data-p="0.5,1" data-def="0.5" onclick="ct(this)"><span class="ct-txt">Green beans</span><span class="qbadge">0.5 cup</span></div>
-        <div class="chip" data-label="cup mixed veg" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">Mixed veg</span><span class="qbadge">1 cup</span></div>
-        <div class="chip" data-label="cup salad" data-unit="cups" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Salad</span><span class="qbadge">1 cup</span></div>
-        <div class="chip" data-label="tbsp olive oil (cooking/drizzle)" data-unit="tbsp" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Olive oil</span><span class="qbadge">1 tbsp</span></div>
-      </div>
-      <textarea class="xinput" id="ex-lunch" placeholder="Extras, sauces, notes..." rows="1" oninput="as(this)"></textarea>
-    </div>
-  </div>
-
-  <!-- AFTERNOON SNACK -->
-  <div class="card">
-    <div class="ch"><span class="ct">Afternoon snack</span><span class="cs">pre-workout if arvo session</span></div>
-    <div class="chips">
-      <div class="crow">
-        <div class="chip" data-label="Carmens protein bar" data-unit="bars" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Carmens bar</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="handful mixed roasted nuts" data-unit="handfuls" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Mixed nuts</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="banana" data-unit="bananas" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Banana</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="rice cake with PB + honey" data-unit="rice cakes" data-p="2,4,6" data-def="4" onclick="ct(this)"><span class="ct-txt">Rice cakes + PB + honey</span><span class="qbadge">4</span></div>
-        <div class="chip" data-label="serve Peckish crackers + Bega Tasty cheese" data-unit="serves" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Peckish crackers + cheese</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="YoPro Perform yoghurt" data-unit="serves" data-p="1" data-def="1" onclick="ct(this)"><span class="ct-txt">YoPro yoghurt</span><span class="qbadge">1</span></div>
-        <div class="chip" data-label="square Lindt 85% dark chocolate" data-unit="squares" data-p="2,4" data-def="2" onclick="ct(this)"><span class="ct-txt">Dark chocolate</span><span class="qbadge">2</span></div>
-        <div class="chip" data-label="scoop WPI shake + milk" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Protein shake (WPI)</span><span class="qbadge">1</span></div>
-      </div>
-      <textarea class="xinput" id="ex-arvo" placeholder="Quantities or extras..." rows="1" oninput="as(this)"></textarea>
-    </div>
-  </div>
-
-  <!-- POST WORKOUT -->
-  <div class="card">
-    <div class="ch"><span class="ct">Post-workout shake</span><span class="cs">if applicable</span></div>
-    <div class="togrow">
-      <div class="tog" id="t-post" onclick="tog('post')"><div class="tok"></div></div>
-      <span class="toglab" id="l-post">No post-workout shake</span>
-    </div>
-    <div id="d-post" style="display:none">
-      <div class="chips">
-        <div class="crow">
-          <div class="chip" data-label="scoop WPI + 150ml full cream milk" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">WPI + full cream milk</span><span class="qbadge">1</span></div>
-          <div class="chip" data-label="scoop WPI + 150ml light milk" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">WPI + light milk</span><span class="qbadge">1</span></div>
-          <div class="chip" data-label="scoop WPI + water" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">WPI + water</span><span class="qbadge">1</span></div>
-          <div class="chip" data-label="banana" data-unit="bananas" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">+ banana</span><span class="qbadge">1</span></div>
-          <div class="chip" data-label="tbsp Chief collagen powder" data-unit="tbsp" data-p="3,6" data-def="3" onclick="ct(this)"><span class="ct-txt">+ collagen</span><span class="qbadge">3 tbsp</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DINNER -->
-  <div class="card">
-    <div class="ch"><span class="ct">Dinner</span></div>
-    <div class="chips">
-      <div class="crow">
-        <div class="chip" data-label="g chicken breast" data-unit="g" data-p="150,175,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Chicken breast</span><span class="qbadge">200g</span></div>
-        <div class="chip" data-label="g scotch fillet" data-unit="g" data-p="150,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Scotch fillet</span><span class="qbadge">200g</span></div>
-        <div class="chip" data-label="g rump steak" data-unit="g" data-p="150,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Rump steak</span><span class="qbadge">200g</span></div>
-        <div class="chip" data-label="lamb cutlet" data-unit="cutlets" data-p="2,3,4" data-def="3" onclick="ct(this)"><span class="ct-txt">Lamb cutlets</span><span class="qbadge">3</span></div>
-        <div class="chip" data-label="g salmon" data-unit="g" data-p="150,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Salmon</span><span class="qbadge">200g</span></div>
-        <div class="chip" data-label="g teriyaki chicken (with veg)" data-unit="g" data-p="150,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Teriyaki chicken</span><span class="qbadge">200g</span></div>
-        <div class="chip" data-label="g stir fry beef + mixed veg" data-unit="g" data-p="150,200,250" data-def="150" onclick="ct(this)"><span class="ct-txt">Stir fry beef</span><span class="qbadge">150g</span></div>
-        <div class="chip" data-label="g bolognese mince" data-unit="g" data-p="150,200,250" data-def="200" onclick="ct(this)"><span class="ct-txt">Bolognese</span><span class="qbadge">200g</span></div>
-        <div class="chip gluten" data-label="slice homemade pizza (sourdough base)" data-unit="slices" data-p="2,3,4" data-def="3" onclick="ct(this)"><span class="ct-txt">Pizza (sourdough)</span><span class="qbadge">3</span></div>
-        <div class="chip" data-label="corn taco (mince + cheese + salad)" data-unit="tacos" data-p="2,3,4" data-def="3" onclick="ct(this)"><span class="ct-txt">Corn tacos</span><span class="qbadge">3</span></div>
-      </div>
-      <div class="crow">
-        <div class="chip" data-label="cup white rice" data-unit="cups" data-p="0.5,1,1.5,2" data-def="1.5" onclick="ct(this)"><span class="ct-txt">White rice</span><span class="qbadge">1.5 cups</span></div>
-        <div class="chip" data-label="cup sweet potato mash" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">Sweet potato mash</span><span class="qbadge">1 cup</span></div>
-        <div class="chip" data-label="cup white potato mash" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">White potato mash</span><span class="qbadge">1 cup</span></div>
-        <div class="chip" data-label="cup GF pasta (cooked)" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">GF pasta</span><span class="qbadge">1 cup</span></div>
-      </div>
-      <div class="crow">
-        <div class="chip" data-label="stalk broccolini" data-unit="stalks" data-p="2,3,4,6" data-def="3" onclick="ct(this)"><span class="ct-txt">Broccolini</span><span class="qbadge">3</span></div>
-        <div class="chip" data-label="cup mixed veg" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">Mixed veg</span><span class="qbadge">1 cup</span></div>
-        <div class="chip" data-label="cup roasted veg" data-unit="cups" data-p="0.5,1,1.5" data-def="1" onclick="ct(this)"><span class="ct-txt">Roasted veg</span><span class="qbadge">1 cup</span></div>
-        <div class="chip" data-label="cup salad" data-unit="cups" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Salad</span><span class="qbadge">1 cup</span></div>
-        <div class="chip" data-label="tbsp olive oil (cooking/drizzle)" data-unit="tbsp" data-p="1,2,3" data-def="2" onclick="ct(this)"><span class="ct-txt">Olive oil</span><span class="qbadge">2 tbsp</span></div>
-      </div>
-      <textarea class="xinput" id="ex-dinner" placeholder="Weight, cooking method, sauces..." rows="1" oninput="as(this)"></textarea>
-    </div>
-  </div>
-
-  <!-- EVENING SNACK -->
-  <div class="card">
-    <div class="ch"><span class="ct">Evening snack</span><span class="cs">if macros are short</span></div>
-    <div class="togrow">
-      <div class="tog" id="t-eve" onclick="tog('eve')"><div class="tok"></div></div>
-      <span class="toglab" id="l-eve">No evening snack tonight</span>
-    </div>
-    <div id="d-eve" style="display:none">
-      <div class="chips">
-        <div class="crow">
-          <div class="chip" data-label="g Greek yoghurt + berries" data-unit="g" data-p="150,200" data-def="150" onclick="ct(this)"><span class="ct-txt">Greek yoghurt + berries</span><span class="qbadge">150g</span></div>
-          <div class="chip" data-label="g Greek yoghurt + WPI scoop + berries" data-unit="g" data-p="150,200" data-def="150" onclick="ct(this)"><span class="ct-txt">Greek yoghurt + WPI + berries</span><span class="qbadge">150g</span></div>
-          <div class="chip" data-label="g Greek yoghurt + WPI scoop + banana" data-unit="g" data-p="150,200" data-def="200" onclick="ct(this)"><span class="ct-txt">Greek yoghurt + WPI + banana</span><span class="qbadge">200g</span></div>
-          <div class="chip" data-label="rice cake with peanut butter" data-unit="rice cakes" data-p="2,4" data-def="2" onclick="ct(this)"><span class="ct-txt">Rice cakes + PB</span><span class="qbadge">2</span></div>
-          <div class="chip" data-label="scoop WPI protein shake" data-unit="scoops" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Protein shake</span><span class="qbadge">1</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DRINKS -->
-  <div class="card">
-    <div class="ch"><span class="ct">Drinks</span></div>
-    <div class="counters">
-      <div class="cg"><span class="clabel">coffees (cream)</span><div class="cbtn" onclick="ac('ccv',-1)">−</div><span class="cval" id="ccv">0</span><div class="cbtn" onclick="ac('ccv',1)">+</div></div>
-      <div class="cg"><span class="clabel">green tea</span><div class="cbtn" onclick="ac('tcv',-1)">−</div><span class="cval" id="tcv">0</span><div class="cbtn" onclick="ac('tcv',1)">+</div></div>
-    </div>
-    <div class="chips" style="padding-top:0">
-      <div class="crow">
-        <div class="chip" data-label="500ml water" onclick="ct(this)"><span class="ct-txt">500ml water</span><span class="qbadge">1×</span></div>
-        <div class="chip" data-label="1L water" onclick="ct(this)"><span class="ct-txt">1L water</span><span class="qbadge">1×</span></div>
-        <div class="chip" data-label="cup Sancha green tea" data-unit="cups" data-p="1,2" data-def="1" onclick="ct(this)"><span class="ct-txt">Sancha green tea</span><span class="qbadge">1</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- NOTES -->
-  <div class="card">
-    <div class="ch"><span class="ct">Notes</span><span class="cs">gut · energy · gluten · sleep</span></div>
-    <div class="chips">
-      <textarea class="xinput" id="ex-notes" placeholder="e.g. felt bloated after lunch, good energy, poor sleep, gluten exposure at dinner..." rows="2" oninput="as(this)"></textarea>
-    </div>
-  </div>
-
-</div>
-
-<!-- Estimate button -->
-<div class="actions">
-  <button class="genbtn" id="estimatebtn" onclick="estimateMacros()">Estimate macros + log to Notion ↗</button>
-  <button class="rstbtn" onclick="clearAll()">Reset</button>
-</div>
-
-<!-- Results -->
-<div class="results" id="results">
-  <div class="results-inner">
-    <div class="results-grid" id="results-grid"></div>
-    <div class="status" id="status-msg"></div>
-    <button class="logbtn" id="logbtn" onclick="logToNotion()" style="display:none">Log this day to Notion →</button>
+<!-- PINNED RUNNING TALLY -->
+<div class="tally" id="tally">
+  <div class="tally-row">
+    <div class="tally-item" id="t-protein"></div>
+    <div class="tally-item" id="t-carbs"></div>
+    <div class="tally-item" id="t-fat"></div>
+    <div class="tally-item" id="t-kcal"></div>
   </div>
 </div>
 
-<!-- Raw log fallback -->
-<div class="outcard" id="outcard">
-  <div class="outhdr">Raw log — paste into Claude manually <button class="cpybtn" onclick="copyOut()">Copy</button></div>
-  <div class="outtxt" id="outtxt"></div>
-</div>
-
-<!-- Qty popup -->
+<!-- QTY POPUP -->
 <div class="popup" id="popup" onclick="if(event.target===this)closePopup()">
   <div class="sheet">
     <h3 id="p-title">Quantity</h3>
@@ -404,33 +194,214 @@ header h1{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;le
 </div>
 
 <script>
-const WORKER = 'https://knowme-proxy.ian-mcarthur.workers.dev';
-const TARGETS = { protein: 160, carbs: 285, fat: 95, kcal: 2950 };
-
-// Date
+const WORKER='https://knowme-proxy.ian-mcarthur.workers.dev';
+const TARGETS={protein:160,carbs:285,fat:95,kcal:2950};
 const D=new Date();
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const TODAY_ISO = D.getFullYear()+'-'+String(D.getMonth()+1).padStart(2,'0')+'-'+String(D.getDate()).padStart(2,'0');
-document.getElementById('datelabel').textContent=DAYS[D.getDay()]+' '+D.getDate()+' '+MONS[D.getMonth()]+' '+D.getFullYear();
+const TODAY_ISO=D.getFullYear()+'-'+String(D.getMonth()+1).padStart(2,'0')+'-'+String(D.getDate()).padStart(2,'0');
+const TODAY_NAME=DAYS[D.getDay()]+' '+D.getDate()+' '+MONS[D.getMonth()];
+document.getElementById('datelabel').textContent=TODAY_NAME+' '+D.getFullYear();
 
-// Toggles
-const togs={ach:false,post:false,eve:false};
-const tLbls={ach:['Not done today','Done today ✓'],post:['No post-workout shake','Post-workout shake ✓'],eve:['No evening snack tonight','Evening snack logged ✓']};
-function tog(id){
-  togs[id]=!togs[id];
-  document.getElementById('t-'+id).className='tog'+(togs[id]?' on':'');
-  document.getElementById('l-'+id).textContent=tLbls[id][togs[id]?1:0];
-  document.getElementById('d-'+id).style.display=togs[id]?'block':'none';
-}
+// Running tally state
+const tally={protein:0,carbs:0,fat:0,kcal:0};
+let notionPageId=null; // track if we've created today's page
 
-// Counters
-function ac(id,d){const e=document.getElementById(id);e.textContent=Math.max(0,parseInt(e.textContent)+d);}
+// Meal definitions
+const MEALS=[
+  {
+    id:'achilles',
+    title:'Pre-achilles shake',
+    sub:'collagen + vit C',
+    chips:[
+      {label:'WPI + collagen + milk',p:'1',def:'1'},
+      {label:'+ Vit C',p:'1',def:'1'},
+      {label:'water only (no milk)',p:'1',def:'1'},
+    ],
+    extra:'ex-achilles'
+  },
+  {
+    id:'breakfast',
+    title:'Breakfast',
+    sub:'',
+    rows:[
+      [
+        {label:'fried egg',unit:'eggs',p:'1,2,3',def:'2'},
+        {label:'scrambled egg (MCT + turmeric + chilli)',unit:'eggs',p:'1,2,3',def:'2'},
+      ],
+      [
+        {label:'slice sourdough (olive oil + butter)',unit:'slices',p:'1,2',def:'1',gluten:true},
+        {label:'slice sourdough + honey',unit:'slices',p:'1,2',def:'1',gluten:true,display:'Sourdough + honey'},
+        {label:'slice GF bread',unit:'slices',p:'1,2',def:'1',display:'GF bread'},
+      ],
+      [
+        {label:'hash brown',unit:'hash browns',p:'1,2,3',def:'1',display:'Hash browns'},
+        {label:'cup baked beans',unit:'cups',p:'0.5,1',def:'0.5',display:'Baked beans'},
+        {label:'avocado',unit:'avocados',p:'0.5,1',def:'0.5',display:'Avocado'},
+        {label:'banana',unit:'bananas',p:'1,2',def:'1',display:'Banana'},
+      ],
+      [
+        {label:'cup GF oats + WPI + berries',unit:'cups',p:'0.5,1',def:'1',display:'GF oats + WPI + berries'},
+        {label:'rice cake with PB + honey',unit:'rice cakes',p:'2,4,6',def:'4',display:'Rice cakes + PB + honey'},
+        {label:'tbsp honey drizzle',unit:'tbsp',p:'0.5,1',def:'0.5',display:'Honey drizzle'},
+      ],
+    ],
+    extra:'ex-bfast'
+  },
+  {
+    id:'morning',
+    title:'Morning snack',
+    sub:'pre-workout if lunch session',
+    rows:[
+      [
+        {label:'Carmens protein bar',unit:'bars',p:'1,2',def:'1',display:'Carmens bar'},
+        {label:'handful mixed roasted nuts',unit:'handfuls',p:'1,2',def:'1',display:'Mixed nuts'},
+        {label:'banana',unit:'bananas',p:'1,2',def:'1',display:'Banana'},
+        {label:'rice cake with PB + honey',unit:'rice cakes',p:'2,4,6',def:'4',display:'Rice cakes + PB + honey'},
+        {label:'serve Peckish crackers + Bega Tasty cheese',unit:'serves',p:'1,2',def:'1',display:'Peckish crackers + cheese'},
+        {label:'scoop WPI shake + milk',unit:'scoops',p:'1,2',def:'1',display:'Protein shake (WPI + milk)'},
+        {label:'tbsp Chief collagen shake',unit:'tbsp',p:'3,6',def:'3',display:'Collagen shake'},
+      ],
+    ],
+    extra:'ex-morning'
+  },
+  {
+    id:'lunch',
+    title:'Lunch',
+    sub:'',
+    rows:[
+      [
+        {label:'g chicken breast',unit:'g',p:'125,150,175,200',def:'150',display:'Chicken breast'},
+        {label:'g steak',unit:'g',p:'125,150,200,250',def:'150',display:'Steak'},
+        {label:'lamb cutlet',unit:'cutlets',p:'1,2,3,4',def:'2',display:'Lamb cutlets'},
+        {label:'can tuna in olive oil',unit:'cans',p:'1,2',def:'1',display:'Tuna (canned)'},
+        {label:'g salmon',unit:'g',p:'100,150,200',def:'150',display:'Salmon'},
+        {label:'commercial chicken banh mi',unit:'rolls',p:'1',def:'1',display:'Banh mi'},
+        {label:'commercial sushi bento box',unit:'boxes',p:'1',def:'1',display:'Sushi bento'},
+        {label:'g bolognese mince',unit:'g',p:'100,150,200',def:'150',display:'Bolognese'},
+      ],
+      [
+        {label:'cup white rice',unit:'cups',p:'0.5,1,1.5,2',def:'1',display:'White rice'},
+        {label:'cup sweet potato mash',unit:'cups',p:'0.5,1,1.5',def:'0.5',display:'Sweet potato mash'},
+        {label:'cup white potato mash',unit:'cups',p:'0.5,1,1.5',def:'1',display:'White potato mash'},
+        {label:'cup GF pasta (cooked)',unit:'cups',p:'0.5,1,1.5',def:'1',display:'GF pasta'},
+        {label:'cup couscous (cooked)',unit:'cups',p:'0.5,1',def:'0.5',gluten:true,display:'Couscous'},
+      ],
+      [
+        {label:'stalk broccolini',unit:'stalks',p:'1,2,3,4',def:'3',display:'Broccolini'},
+        {label:'cup steamed green beans',unit:'cups',p:'0.5,1',def:'0.5',display:'Green beans'},
+        {label:'cup mixed veg',unit:'cups',p:'0.5,1,1.5',def:'1',display:'Mixed veg'},
+        {label:'cup salad',unit:'cups',p:'1,2',def:'1',display:'Salad'},
+        {label:'tbsp olive oil (cooking/drizzle)',unit:'tbsp',p:'1,2',def:'1',display:'Olive oil'},
+      ],
+    ],
+    extra:'ex-lunch'
+  },
+  {
+    id:'arvo',
+    title:'Afternoon snack',
+    sub:'pre-workout if arvo session',
+    rows:[
+      [
+        {label:'Carmens protein bar',unit:'bars',p:'1,2',def:'1',display:'Carmens bar'},
+        {label:'handful mixed roasted nuts',unit:'handfuls',p:'1,2',def:'1',display:'Mixed nuts'},
+        {label:'banana',unit:'bananas',p:'1,2',def:'1',display:'Banana'},
+        {label:'rice cake with PB + honey',unit:'rice cakes',p:'2,4,6',def:'4',display:'Rice cakes + PB + honey'},
+        {label:'serve Peckish crackers + Bega Tasty cheese',unit:'serves',p:'1,2',def:'1',display:'Peckish crackers + cheese'},
+        {label:'YoPro Perform yoghurt',unit:'serves',p:'1',def:'1',display:'YoPro yoghurt'},
+        {label:'square Lindt 85% dark chocolate',unit:'squares',p:'2,4',def:'2',display:'Dark chocolate'},
+        {label:'scoop WPI shake + milk',unit:'scoops',p:'1,2',def:'1',display:'Protein shake (WPI)'},
+      ],
+    ],
+    extra:'ex-arvo'
+  },
+  {
+    id:'post',
+    title:'Post-workout shake',
+    sub:'if applicable',
+    rows:[
+      [
+        {label:'scoop WPI + 150ml full cream milk',unit:'scoops',p:'1,2',def:'1',display:'WPI + full cream milk'},
+        {label:'scoop WPI + 150ml light milk',unit:'scoops',p:'1,2',def:'1',display:'WPI + light milk'},
+        {label:'scoop WPI + water',unit:'scoops',p:'1,2',def:'1',display:'WPI + water'},
+        {label:'banana',unit:'bananas',p:'1,2',def:'1',display:'+ banana'},
+        {label:'tbsp Chief collagen powder',unit:'tbsp',p:'3,6',def:'3',display:'+ collagen'},
+      ],
+    ],
+    extra:'ex-post'
+  },
+  {
+    id:'dinner',
+    title:'Dinner',
+    sub:'',
+    rows:[
+      [
+        {label:'g chicken breast',unit:'g',p:'150,175,200,250',def:'200',display:'Chicken breast'},
+        {label:'g scotch fillet',unit:'g',p:'150,200,250',def:'200',display:'Scotch fillet'},
+        {label:'g rump steak',unit:'g',p:'150,200,250',def:'200',display:'Rump steak'},
+        {label:'lamb cutlet',unit:'cutlets',p:'2,3,4',def:'3',display:'Lamb cutlets'},
+        {label:'g salmon',unit:'g',p:'150,200,250',def:'200',display:'Salmon'},
+        {label:'g teriyaki chicken (with veg)',unit:'g',p:'150,200,250',def:'200',display:'Teriyaki chicken'},
+        {label:'g stir fry beef + mixed veg',unit:'g',p:'150,200,250',def:'150',display:'Stir fry beef'},
+        {label:'g bolognese mince',unit:'g',p:'150,200,250',def:'200',display:'Bolognese'},
+        {label:'slice homemade pizza (sourdough base)',unit:'slices',p:'2,3,4',def:'3',gluten:true,display:'Pizza (sourdough)'},
+        {label:'corn taco (mince + cheese + salad)',unit:'tacos',p:'2,3,4',def:'3',display:'Corn tacos'},
+      ],
+      [
+        {label:'cup white rice',unit:'cups',p:'0.5,1,1.5,2',def:'1.5',display:'White rice'},
+        {label:'cup sweet potato mash',unit:'cups',p:'0.5,1,1.5',def:'1',display:'Sweet potato mash'},
+        {label:'cup white potato mash',unit:'cups',p:'0.5,1,1.5',def:'1',display:'White potato mash'},
+        {label:'cup GF pasta (cooked)',unit:'cups',p:'0.5,1,1.5',def:'1',display:'GF pasta'},
+      ],
+      [
+        {label:'stalk broccolini',unit:'stalks',p:'2,3,4,6',def:'3',display:'Broccolini'},
+        {label:'cup mixed veg',unit:'cups',p:'0.5,1,1.5',def:'1',display:'Mixed veg'},
+        {label:'cup roasted veg',unit:'cups',p:'0.5,1,1.5',def:'1',display:'Roasted veg'},
+        {label:'cup salad',unit:'cups',p:'1,2',def:'1',display:'Salad'},
+        {label:'tbsp olive oil (cooking/drizzle)',unit:'tbsp',p:'1,2,3',def:'2',display:'Olive oil'},
+      ],
+    ],
+    extra:'ex-dinner'
+  },
+  {
+    id:'evening',
+    title:'Evening snack',
+    sub:'if macros are short',
+    rows:[
+      [
+        {label:'g Greek yoghurt + berries',unit:'g',p:'150,200',def:'150',display:'Greek yoghurt + berries'},
+        {label:'g Greek yoghurt + WPI scoop + berries',unit:'g',p:'150,200',def:'150',display:'Greek yoghurt + WPI + berries'},
+        {label:'g Greek yoghurt + WPI scoop + banana',unit:'g',p:'150,200',def:'200',display:'Greek yoghurt + WPI + banana'},
+        {label:'rice cake with peanut butter',unit:'rice cakes',p:'2,4',def:'2',display:'Rice cakes + PB'},
+        {label:'scoop WPI protein shake',unit:'scoops',p:'1,2',def:'1',display:'Protein shake'},
+      ],
+    ],
+    extra:'ex-evening'
+  },
+  {
+    id:'drinks',
+    title:'Drinks',
+    sub:'',
+    counters:[
+      {id:'ccv',label:'coffees (cream)'},
+      {id:'tcv',label:'green tea'},
+    ],
+    rows:[
+      [
+        {label:'500ml water',display:'500ml water'},
+        {label:'1L water',display:'1L water'},
+        {label:'cup Sancha green tea',unit:'cups',p:'1,2',def:'1',display:'Sancha green tea'},
+      ],
+    ],
+    extra:'ex-drinks'
+  },
+];
 
-// Autosize
-function as(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+// State per meal: {active, logged, macros}
+const mealState={};
+MEALS.forEach(m=>mealState[m.id]={active:false,logged:false,macros:null});
 
-// Chip state
+// Chip qty state
 const chipQty=new Map();
 let activeChip=null;
 
@@ -513,243 +484,316 @@ function closePopup(){
   activeChip=null;
 }
 
-// Build food log text from selections
-function buildLog(){
-  const cards=[...document.querySelectorAll('.scroll .card')];
+function as(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+
+function ac(id,d){
+  const e=document.getElementById(id);
+  e.textContent=Math.max(0,parseInt(e.textContent)+d);
+}
+
+// Toggle meal active state
+function toggleMeal(mealId){
+  const state=mealState[mealId];
+  if(state.logged) return; // can't toggle a logged meal
+  state.active=!state.active;
+  renderMealCard(mealId);
+}
+
+// Build food log text for a specific meal card
+function buildMealLog(mealId){
+  const card=document.getElementById('card-'+mealId);
   const lines=[];
-
-  function chipsFrom(card){
-    const result=[];
-    card.querySelectorAll('.chip.on').forEach(el=>{
-      const q=chipQty.get(el)||(el.dataset.def||'1');
-      const label=el.dataset.label||el.querySelector('.ct-txt').textContent.trim();
-      result.push(q+' '+label);
+  card.querySelectorAll('.chip.on').forEach(el=>{
+    const q=chipQty.get(el)||(el.dataset.def||'1');
+    const label=el.dataset.label||el.querySelector('.ct-txt').textContent.trim();
+    lines.push(q+' '+label);
+  });
+  // Counters
+  const meal=MEALS.find(m=>m.id===mealId);
+  if(meal.counters){
+    meal.counters.forEach(c=>{
+      const v=parseInt(document.getElementById(c.id)?.textContent||'0');
+      if(v>0) lines.push(v+' '+c.label);
     });
-    return result;
   }
-
-  if(togs.ach){
-    const items=chipsFrom(cards[0]);
-    lines.push('Pre-achilles shake: '+(items.length?items.join(', '):'WPI + collagen + milk'));
-  }
-
-  const bf=[...chipsFrom(cards[1])];
-  const bfx=document.getElementById('ex-bfast').value.trim();
-  if(bfx) bf.push(bfx);
-  if(bf.length) lines.push('Breakfast: '+bf.join(', '));
-
-  const ms=[...chipsFrom(cards[2])];
-  const msx=document.getElementById('ex-morning').value.trim();
-  if(msx) ms.push(msx);
-  if(ms.length) lines.push('Morning snack: '+ms.join(', '));
-
-  const lu=[...chipsFrom(cards[3])];
-  const lux=document.getElementById('ex-lunch').value.trim();
-  if(lux) lu.push(lux);
-  if(lu.length) lines.push('Lunch: '+lu.join(', '));
-
-  const av=[...chipsFrom(cards[4])];
-  const avx=document.getElementById('ex-arvo').value.trim();
-  if(avx) av.push(avx);
-  if(av.length) lines.push('Afternoon snack: '+av.join(', '));
-
-  if(togs.post){
-    const pw=chipsFrom(cards[5]);
-    lines.push('Post-workout shake: '+(pw.length?pw.join(', '):'1 scoop WPI + milk'));
-  }
-
-  const di=[...chipsFrom(cards[6])];
-  const dix=document.getElementById('ex-dinner').value.trim();
-  if(dix) di.push(dix);
-  if(di.length) lines.push('Dinner: '+di.join(', '));
-
-  if(togs.eve){
-    const ev=chipsFrom(cards[7]);
-    lines.push('Evening snack: '+(ev.length?ev.join(', '):'Greek yoghurt + berries'));
-  }
-
-  const coffees=parseInt(document.getElementById('ccv').textContent);
-  const teas=parseInt(document.getElementById('tcv').textContent);
-  const dk=chipsFrom(cards[8]);
-  const dkall=[];
-  if(coffees>0) dkall.push(coffees+' coffee with cream');
-  if(teas>0) dkall.push(teas+' green tea');
-  dkall.push(...dk);
-  if(dkall.length) lines.push('Drinks: '+dkall.join(', '));
-
-  const notes=document.getElementById('ex-notes').value.trim();
-  if(notes) lines.push('Notes: '+notes);
-
-  return lines.join('\n');
+  const extra=document.getElementById(meal.extra);
+  if(extra&&extra.value.trim()) lines.push(extra.value.trim());
+  return lines.join(', ');
 }
 
-// Detect flags from log text
-function detectFlags(logText){
-  const l=logText.toLowerCase();
-  return {
-    trainingDay: togs.post,
-    preAchilles: togs.ach,
-    postWorkout: togs.post,
-    eveningSnack: togs.eve,
-    glutenExposure: l.includes('sourdough')||l.includes('couscous')||l.includes('pizza')||l.includes('hoisin')
-  };
-}
+// Log a single meal
+async function logMeal(mealId){
+  const logText=buildMealLog(mealId);
+  if(!logText.trim()){
+    setLogStatus(mealId,'Select at least one item first','err');
+    return;
+  }
 
-// Stored macros for logging
-let pendingMacros=null;
-let pendingLog='';
-let pendingFlags={};
-
-async function estimateMacros(){
-  const log=buildLog();
-  if(!log.trim()){alert('Select at least one item first.');return;}
-
-  pendingLog=log;
-  pendingFlags=detectFlags(log);
-
-  // Show raw log as fallback
-  document.getElementById('outtxt').textContent=log;
-  document.getElementById('outcard').className='outcard show';
-
-  // Show loading state
-  const btn=document.getElementById('estimatebtn');
+  const btn=document.getElementById('logbtn-'+mealId);
+  const meal=MEALS.find(m=>m.id===mealId);
   btn.disabled=true;
-  btn.textContent='Estimating macros...';
-
-  showStatus('loading','Estimating macros via Claude...');
-  document.getElementById('results').className='results show';
-  document.getElementById('logbtn').style.display='none';
+  btn.textContent='Estimating...';
+  btn.className='logbtn logging';
+  setLogStatus(mealId,'Calling Claude...','');
 
   try {
     const res=await fetch(WORKER+'/estimate',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({foodLog:log})
+      body:JSON.stringify({foodLog:meal.title+': '+logText})
     });
     const macros=await res.json();
+    if(macros.error) throw new Error(macros.error);
 
-    if(macros.error){
-      showStatus('error','Estimation failed: '+macros.error);
-      btn.disabled=false;
-      btn.textContent='Estimate macros + log to Notion ↗';
-      return;
-    }
+    // Update running tally
+    tally.protein+=macros.protein||0;
+    tally.carbs+=macros.carbs||0;
+    tally.fat+=macros.fat||0;
+    tally.kcal+=macros.kcal||0;
+    renderTally();
 
-    pendingMacros=macros;
-    renderMacros(macros);
-    showStatus('','');
-    document.getElementById('status-msg').className='status';
-    document.getElementById('logbtn').style.display='block';
+    // Store meal macros
+    mealState[mealId].macros=macros;
+    mealState[mealId].logged=true;
+    mealState[mealId].active=false;
+
+    // Show meal summary
+    showMealSummary(mealId,meal.title,macros);
+
+    // Sync to Notion in background
+    syncToNotion();
+
+    btn.textContent='Logged ✓';
+    btn.className='logbtn done';
+    setLogStatus(mealId,'','');
+    renderMealCard(mealId);
 
   } catch(e){
-    showStatus('error','Could not reach the server. Check your connection and try again.');
+    btn.disabled=false;
+    btn.textContent='Retry';
+    btn.className='logbtn';
+    setLogStatus(mealId,'Error: '+e.message,'err');
   }
-
-  btn.disabled=false;
-  btn.textContent='Re-estimate ↺';
-  btn.style.background='var(--sur2)';
-  btn.style.color='var(--txt2)';
-  btn.style.border='1px solid var(--bdr2)';
-  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function renderMacros(m){
-  const grid=document.getElementById('results-grid');
-  const items=[
-    {key:'protein',label:'Protein',target:TARGETS.protein,unit:'g'},
-    {key:'carbs',label:'Carbs',target:TARGETS.carbs,unit:'g'},
-    {key:'fat',label:'Fat',target:TARGETS.fat,unit:'g'},
-    {key:'kcal',label:'Calories',target:TARGETS.kcal,unit:'kcal'},
-  ];
-  grid.innerHTML=items.map(i=>{
-    const val=m[i.key]||0;
-    const hit=val>=i.target;
-    return `<div class="ritem">
-      <div class="rval ${hit?'hit':'miss'}">${val}${i.unit==='g'?'g':''}</div>
-      <div class="rlabel">${i.label}</div>
-      <div class="rtarget">target ${i.target}${i.unit==='g'?'g':''}</div>
+function setLogStatus(mealId,msg,type){
+  const el=document.getElementById('logstatus-'+mealId);
+  if(!el) return;
+  el.textContent=msg;
+  el.className='log-status'+(type?' '+type:'');
+}
+
+function showMealSummary(mealId,title,m){
+  const el=document.getElementById('summary-'+mealId);
+  if(!el) return;
+  el.innerHTML=`
+    <div class="ms-title">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      ${title} logged
+    </div>
+    <div class="ms-grid">
+      <div class="ms-item"><div class="ms-val">${m.protein}g</div><div class="ms-lbl">protein</div></div>
+      <div class="ms-item"><div class="ms-val">${m.carbs}g</div><div class="ms-lbl">carbs</div></div>
+      <div class="ms-item"><div class="ms-val">${m.fat}g</div><div class="ms-lbl">fat</div></div>
+      <div class="ms-item"><div class="ms-val">${m.kcal}</div><div class="ms-lbl">kcal</div></div>
     </div>`;
-  }).join('');
+  el.className='meal-summary show';
 }
 
-async function logToNotion(){
-  if(!pendingMacros){return;}
-  const logbtn=document.getElementById('logbtn');
-  logbtn.disabled=true;
-  logbtn.textContent='Logging to Notion...';
-  showStatus('loading','Writing to Notion...');
+// Sync accumulated totals to Notion (create or update)
+async function syncToNotion(){
+  const notes=Object.entries(mealState)
+    .filter(([,s])=>s.logged&&s.macros)
+    .map(([id,])=>id)
+    .join(', ')+' logged';
 
-  const dayName=DAYS[D.getDay()]+' '+D.getDate()+' '+MONS[D.getMonth()];
+  const flags={
+    trainingDay: mealState.post.logged,
+    preAchilles: mealState.achilles.logged,
+    postWorkout: mealState.post.logged,
+    eveningSnack: mealState.evening.logged,
+    glutenExposure: detectGlutenExposure()
+  };
 
   try {
     const res=await fetch(WORKER+'/log',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        date: TODAY_ISO,
-        name: dayName,
-        macros: pendingMacros,
-        flags: pendingFlags,
-        notes: document.getElementById('ex-notes').value.trim()
+        date:TODAY_ISO,
+        name:TODAY_NAME,
+        macros:{...tally},
+        flags,
+        notes,
+        notionPageId
       })
     });
     const result=await res.json();
-    if(result.success){
-      showStatus('success','✓ Logged to Notion successfully');
-      logbtn.textContent='Logged ✓';
-      logbtn.style.background='var(--ok-d)';
-      logbtn.style.borderColor='var(--ok)';
-      logbtn.style.color='var(--ok)';
-    } else {
-      showStatus('error','Notion error: '+(result.error||'Unknown error'));
-      logbtn.disabled=false;
-      logbtn.textContent='Retry log to Notion →';
+    if(result.success&&result.notionPageId){
+      notionPageId=result.notionPageId;
     }
   } catch(e){
-    showStatus('error','Could not reach the server. Check your connection.');
-    logbtn.disabled=false;
-    logbtn.textContent='Retry log to Notion →';
+    console.log('Notion sync error:',e);
   }
 }
 
-function showStatus(type,msg){
-  const el=document.getElementById('status-msg');
-  if(!type||!msg){el.className='status';return;}
-  el.className='status show '+type;
-  el.textContent=msg;
+function detectGlutenExposure(){
+  const allChips=document.querySelectorAll('.chip.gluten.on');
+  return allChips.length>0;
 }
 
-function copyOut(){
-  const text=document.getElementById('outtxt').textContent;
-  if(navigator.clipboard){
-    navigator.clipboard.writeText(text).then(()=>{
-      const btn=document.querySelector('.cpybtn');
-      btn.textContent='Copied ✓';
-      setTimeout(()=>btn.textContent='Copy',2500);
-    });
-  }
-}
-
-function clearAll(){
-  document.querySelectorAll('.chip.on').forEach(el=>{
-    el.classList.remove('on');
-    chipQty.delete(el);
-    const b=el.querySelector('.qbadge');
-    if(b) b.style.display='none';
+// Render the pinned tally
+function renderTally(){
+  const macros=[
+    {key:'protein',label:'Protein',target:TARGETS.protein,unit:'g',id:'t-protein'},
+    {key:'carbs',label:'Carbs',target:TARGETS.carbs,unit:'g',id:'t-carbs'},
+    {key:'fat',label:'Fat',target:TARGETS.fat,unit:'g',id:'t-fat'},
+    {key:'kcal',label:'Kcal',target:TARGETS.kcal,unit:'',id:'t-kcal'},
+  ];
+  macros.forEach(({key,label,target,unit,id})=>{
+    const val=tally[key];
+    const pct=Math.min(100,(val/target)*100);
+    const tickPct=Math.min(98,(target/(target*1.3))*100);
+    const gap=target-val;
+    const hit=val>=target;
+    const warn=val>=target*0.8&&!hit;
+    const cls=hit?'hit':warn?'warn':'miss';
+    const barColor=hit?'var(--ok)':warn?'var(--warn)':'#3d3d38';
+    const el=document.getElementById(id);
+    el.innerHTML=`
+      <div class="tally-label">${label}<span class="${cls}">${val}${unit}</span></div>
+      <div class="tbar-bg">
+        <div class="tbar-fill" style="width:${pct}%;background:${barColor}"></div>
+        <div class="tbar-tick" style="left:${tickPct}%"></div>
+      </div>
+      <div class="tally-nums">
+        <span style="color:var(--txt3)">${target}${unit} target</span>
+        <span class="gap ${cls}">${hit?'✓ met':'−'+gap+unit+' to go'}</span>
+      </div>`;
   });
-  document.querySelectorAll('.xinput').forEach(t=>{t.value='';t.style.height='auto';});
-  document.getElementById('ccv').textContent='0';
-  document.getElementById('tcv').textContent='0';
-  ['ach','post','eve'].forEach(id=>{if(togs[id])tog(id);});
-  document.getElementById('results').className='results';
-  document.getElementById('outcard').className='outcard';
-  const btn=document.getElementById('estimatebtn');
-  btn.textContent='Estimate macros + log to Notion ↗';
-  btn.disabled=false;
-  btn.style.background='';btn.style.color='';btn.style.border='';
-  pendingMacros=null;
+}
+
+// Render a single meal card
+function renderMealCard(mealId){
+  const card=document.getElementById('card-'+mealId);
+  const state=mealState[mealId];
+  const meal=MEALS.find(m=>m.id===mealId);
+
+  // Card class
+  let cardClass='meal-card';
+  if(state.logged) cardClass+=' logged';
+  else if(state.active) cardClass+=' active';
+  else cardClass+=' skipped';
+  card.className=cardClass;
+
+  // Toggle icon
+  const tog=card.querySelector('.meal-toggle');
+  if(state.logged){
+    tog.className='meal-toggle logged-icon';
+    tog.innerHTML=`<svg viewBox="0 0 12 12" fill="none" style="color:var(--ok)"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  } else if(state.active){
+    tog.className='meal-toggle on';
+    tog.innerHTML=`<svg viewBox="0 0 12 12" fill="none" style="color:var(--acc)"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  } else {
+    tog.className='meal-toggle';
+    tog.innerHTML='';
+  }
+
+  // Badge
+  const badge=card.querySelector('.meal-status-badge');
+  if(state.logged){badge.textContent='logged';badge.className='meal-status-badge badge-logged';}
+  else if(state.active){badge.textContent='ready to log';badge.className='meal-status-badge badge-ready';}
+  else {badge.textContent='tap to log';badge.className='meal-status-badge badge-off';}
+
+  // Body
+  const body=card.querySelector('.meal-body');
+  body.className='meal-body'+(state.active?' open':'');
+}
+
+// Build all meal cards
+function buildUI(){
+  const list=document.getElementById('meal-list');
+  list.innerHTML='';
+
+  MEALS.forEach(meal=>{
+    const card=document.createElement('div');
+    card.className='meal-card skipped';
+    card.id='card-'+meal.id;
+
+    // Chip rows HTML
+    let chipsHTML='';
+    const rows=meal.rows||[];
+    if(rows.length){
+      chipsHTML='<div class="chips">';
+      rows.forEach(row=>{
+        chipsHTML+='<div class="crow">';
+        row.forEach(chip=>{
+          const gluClass=chip.gluten?' gluten':'';
+          const display=chip.display||chip.label;
+          const dataAttrs=chip.unit?`data-label="${chip.label}" data-unit="${chip.unit}" data-p="${chip.p}" data-def="${chip.def}"`:`data-label="${chip.label}"`;
+          chipsHTML+=`<div class="chip${gluClass}" ${dataAttrs} onclick="ct(this)"><span class="ct-txt">${display}</span><span class="qbadge">${chip.def||'1'}${chip.unit==='g'?'g':chip.unit==='cups'?' cup':chip.unit==='tbsp'?' tbsp':'×'}</span></div>`;
+        });
+        chipsHTML+='</div>';
+      });
+      chipsHTML+='</div>';
+    } else if(meal.chips){
+      chipsHTML='<div class="chips"><div class="crow">';
+      meal.chips.forEach(chip=>{
+        chipsHTML+=`<div class="chip" data-label="${chip.label}" onclick="ct(this)"><span class="ct-txt">${chip.label}</span><span class="qbadge">1×</span></div>`;
+      });
+      chipsHTML+='</div></div>';
+    }
+
+    // Counter HTML
+    let counterHTML='';
+    if(meal.counters){
+      counterHTML='<div class="counters">';
+      meal.counters.forEach(c=>{
+        counterHTML+=`<div class="cg"><span class="clabel">${c.label}</span><div class="cbtn" onclick="ac('${c.id}',-1)">−</div><span class="cval" id="${c.id}">0</span><div class="cbtn" onclick="ac('${c.id}',1)">+</div></div>`;
+      });
+      counterHTML+='</div>';
+    }
+
+    card.innerHTML=`
+      <div class="meal-header" onclick="toggleMeal('${meal.id}')">
+        <div class="meal-toggle"></div>
+        <div class="meal-title">
+          <div class="mt">${meal.title}</div>
+          ${meal.sub?`<div class="ms">${meal.sub}</div>`:''}
+        </div>
+        <div class="meal-status-badge badge-off">tap to log</div>
+      </div>
+      <div class="meal-summary" id="summary-${meal.id}"></div>
+      <div class="meal-body">
+        ${counterHTML}
+        ${chipsHTML}
+        <div class="chips" style="padding-top:0">
+          <textarea class="xinput" id="${meal.extra}" placeholder="Anything else..." rows="1" oninput="as(this)"></textarea>
+        </div>
+        <div class="log-row">
+          <button class="logbtn" id="logbtn-${meal.id}" onclick="logMeal('${meal.id}')">Log it ↗</button>
+          <span class="log-status" id="logstatus-${meal.id}"></span>
+        </div>
+      </div>`;
+
+    list.appendChild(card);
+  });
+
+  renderTally();
+}
+
+function resetDay(){
+  if(!confirm('Reset all meals for today?')) return;
+  MEALS.forEach(m=>{mealState[m.id]={active:false,logged:false,macros:null};});
+  tally.protein=0;tally.carbs=0;tally.fat=0;tally.kcal=0;
+  notionPageId=null;
+  chipQty.clear();
+  buildUI();
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+// Init
+buildUI();
 </script>
 </body>
 </html>
