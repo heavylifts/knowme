@@ -546,10 +546,10 @@ async function logMeal(mealId){
     if(macros.error) throw new Error(macros.error);
 
     // Update running tally
-    tally.protein+=macros.protein||0;
-    tally.carbs+=macros.carbs||0;
-    tally.fat+=macros.fat||0;
-    tally.kcal+=macros.kcal||0;
+    tally.protein+=Math.round(Number(macros.protein)||0);
+    tally.carbs+=Math.round(Number(macros.carbs)||0);
+    tally.fat+=Math.round(Number(macros.fat)||0);
+    tally.kcal+=Math.round(Number(macros.kcal)||0);
     renderTally();
 
     // Store meal macros
@@ -586,16 +586,20 @@ function setLogStatus(mealId,msg,type){
 function showMealSummary(mealId,title,m){
   const el=document.getElementById('summary-'+mealId);
   if(!el) return;
+  const p=Math.round(m.protein||0);
+  const c=Math.round(m.carbs||0);
+  const f=Math.round(m.fat||0);
+  const k=Math.round(m.kcal||0);
   el.innerHTML=`
     <div class="ms-title">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       ${title} logged
     </div>
     <div class="ms-grid">
-      <div class="ms-item"><div class="ms-val">${m.protein}g</div><div class="ms-lbl">protein</div></div>
-      <div class="ms-item"><div class="ms-val">${m.carbs}g</div><div class="ms-lbl">carbs</div></div>
-      <div class="ms-item"><div class="ms-val">${m.fat}g</div><div class="ms-lbl">fat</div></div>
-      <div class="ms-item"><div class="ms-val">${m.kcal}</div><div class="ms-lbl">kcal</div></div>
+      <div class="ms-item"><div class="ms-val">${p}g</div><div class="ms-lbl">protein</div></div>
+      <div class="ms-item"><div class="ms-val">${c}g</div><div class="ms-lbl">carbs</div></div>
+      <div class="ms-item"><div class="ms-val">${f}g</div><div class="ms-lbl">fat</div></div>
+      <div class="ms-item"><div class="ms-val">${k}</div><div class="ms-lbl">kcal</div></div>
     </div>`;
   el.className='meal-summary show';
 }
