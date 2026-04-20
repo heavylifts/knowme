@@ -29,6 +29,16 @@ header h1{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;le
 .hdate{font-size:11px;color:var(--txt2);font-family:'DM Mono',monospace;margin-top:2px}
 .hbtn{background:var(--sur2);border:1px solid var(--bdr2);color:var(--txt2);font-size:12px;padding:6px 12px;border-radius:var(--rsm);font-family:'DM Mono',monospace;cursor:pointer}
 
+/* DATE PICKER */
+.date-bar{margin:8px 16px 0;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;gap:10px}
+.date-bar.past{border-color:var(--warn);background:var(--warn-d)}
+.date-bar-label{font-size:11px;color:var(--txt3);font-family:'DM Mono',monospace;white-space:nowrap}
+.date-bar.past .date-bar-label{color:var(--warn)}
+.date-input{flex:1;background:transparent;border:none;color:var(--txt);font-size:13px;font-family:'DM Mono',monospace;font-weight:500;cursor:pointer;outline:none}
+.date-input::-webkit-calendar-picker-indicator{filter:invert(0.6);cursor:pointer;margin-left:4px}
+.date-today-btn{font-size:11px;color:var(--acc);font-family:'DM Mono',monospace;cursor:pointer;padding:3px 8px;border:1px solid var(--acc);border-radius:10px;background:var(--acc-d);white-space:nowrap;display:none}
+.date-bar.past .date-today-btn{display:block}
+
 /* NOTION LINK */
 .nlink{margin:10px 16px 6px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;text-decoration:none}
 .nlink .nl{display:flex;align-items:center;gap:10px}
@@ -163,6 +173,12 @@ header h1{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;le
   <div class="nl"><div class="ni">🥩</div><div><div class="t1">Nutrition Tracker</div><div class="t2">Open in Notion →</div></div></div>
 </a>
 
+<div class="date-bar" id="date-bar">
+  <span class="date-bar-label" id="date-bar-label">Logging for</span>
+  <input type="date" class="date-input" id="date-input" onchange="onDateChange()">
+  <span class="date-today-btn" onclick="resetToToday()">Back to today</span>
+</div>
+
 <div class="scroll" id="meal-list"></div>
 
 <!-- PINNED RUNNING TALLY -->
@@ -196,16 +212,64 @@ header h1{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;le
 <script>
 const WORKER='https://knowme-proxy.ian-mcarthur.workers.dev';
 const TARGETS={protein:160,carbs:285,fat:95,kcal:2950};
-const D=new Date();
 const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const TODAY_ISO=D.getFullYear()+'-'+String(D.getMonth()+1).padStart(2,'0')+'-'+String(D.getDate()).padStart(2,'0');
-const TODAY_NAME=DAYS[D.getDay()]+' '+D.getDate()+' '+MONS[D.getMonth()];
-document.getElementById('datelabel').textContent=TODAY_NAME+' '+D.getFullYear();
+
+// AEST date helper
+function getAESTDate(){
+  const now=new Date();
+  // AEST = UTC+10, AEDT = UTC+11. Use fixed +10 for simplicity.
+  const aest=new Date(now.getTime()+10*60*60*1000);
+  return aest;
+}
+
+function isoFromDate(d){
+  return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
+}
+
+function nameFromISO(iso){
+  const [y,m,day]=iso.split('-').map(Number);
+  const d=new Date(Date.UTC(y,m-1,day));
+  return DAYS[d.getUTCDay()]+' '+day+' '+MONS[m-1]+' '+y;
+}
+
+const AEST_TODAY=getAESTDate();
+const TODAY_ISO=isoFromDate(AEST_TODAY);
+
+// Mutable selected date — defaults to today
+let selectedISO=TODAY_ISO;
+let selectedName=nameFromISO(TODAY_ISO);
+
+// Init date input
+document.getElementById('datelabel').textContent=nameFromISO(TODAY_ISO);
+document.getElementById('date-input').value=TODAY_ISO;
+document.getElementById('date-input').max=TODAY_ISO;
+
+function onDateChange(){
+  const val=document.getElementById('date-input').value;
+  if(!val) return;
+  selectedISO=val;
+  selectedName=nameFromISO(val);
+  const isPast=val<TODAY_ISO;
+  const bar=document.getElementById('date-bar');
+  const lbl=document.getElementById('date-bar-label');
+  bar.className='date-bar'+(isPast?' past':'');
+  lbl.textContent=isPast?'Logging for (past)':'Logging for';
+  document.getElementById('datelabel').textContent=selectedName;
+}
+
+function resetToToday(){
+  selectedISO=TODAY_ISO;
+  selectedName=nameFromISO(TODAY_ISO);
+  document.getElementById('date-input').value=TODAY_ISO;
+  document.getElementById('date-bar').className='date-bar';
+  document.getElementById('date-bar-label').textContent='Logging for';
+  document.getElementById('datelabel').textContent=selectedName;
+}
 
 // Running tally state
 const tally={protein:0,carbs:0,fat:0,kcal:0};
-let notionPageId=null; // track if we've created today's page
+let notionPageId=null;
 
 // Meal definitions
 const MEALS=[
@@ -624,8 +688,8 @@ async function syncToNotion(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        date:TODAY_ISO,
-        name:TODAY_NAME,
+        date:selectedISO,
+        name:selectedName,
         macros:{...tally},
         flags,
         notes,
